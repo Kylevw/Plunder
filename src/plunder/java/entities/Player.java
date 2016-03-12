@@ -5,13 +5,12 @@
  */
 package plunder.java.entities;
 
+import java.awt.Dimension;
 import plunder.java.main.ActionState;
 import plunder.java.main.Direction;
 import plunder.java.resources.PImageManager;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.main.ScreenLimitProviderIntf;
-import images.Animator;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -28,7 +27,9 @@ public class Player extends Entity {
     private static final int PLAYER_HEIGHT = 16;
     private int health, maxHealth;
     
+    private static final int WEIGHT = 4;
     private final DurationTimer invulTimer;
+    private final DurationTimer healthTimer;
     
     {
         actionState = ActionState.IDLE;
@@ -43,12 +44,12 @@ public class Player extends Entity {
     private Direction facing;
     private ActionState actionState;
     private ActionState actionStateDebug;
-    private static final int ANIMATION_SPEED = 160;
     
     private final Point environmentPosition;
     private final Point displacementPosition;
     
-    private final Animator animator;
+    private static final int ANIMATION_SPEED = 160;
+    
     
     /**
      * Constructor, returns an instance of the Player class
@@ -61,9 +62,9 @@ public class Player extends Entity {
     
     public Player(Point position, ScreenLimitProviderIntf screenLimiter, ImageProviderIntf ip) {
 
-        super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), ip);
+        super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), WEIGHT, ip, PImageManager.PLAYER_WALK_DOWN_LIST, ANIMATION_SPEED);
         this.directions = new ArrayList<>();
-        maxHealth = 6;
+        maxHealth = 12;
         health = maxHealth;
         this.environmentPosition = new Point(position);
         this.displacementPosition = new Point(0, 0);
@@ -71,9 +72,7 @@ public class Player extends Entity {
         screenLimiter.setMaxY(screenLimiter.getMaxY() + (getSize().height / 2));
         
         invulTimer = new DurationTimer(1200);
-        
-        PImageManager im = new PImageManager();
-        this.animator = new Animator(im, getImageProvider().getImageList(PImageManager.PLAYER_WALK_DOWN_LIST), ANIMATION_SPEED);
+        healthTimer = new DurationTimer(1600);
     }
     
     @Override
@@ -83,6 +82,12 @@ public class Player extends Entity {
     
     @Override
     public void timerTaskHandler() {
+        
+        if (health <= 0) {
+            setDespawn(true);
+        }
+        
+        if (healthTimer.isComplete()) healthTimer.start();
         
         if (maxHealth % 2 > 0) maxHealth++;
         if (health > maxHealth) health = maxHealth;
@@ -100,10 +105,10 @@ public class Player extends Entity {
         actionStateDebug = actionState;
         facingDebug = facing;
         
-        updateImage();
-        
         // Updates the player's position in the world
         setPosition(environmentPosition.x + displacementPosition.x, environmentPosition.y + displacementPosition.y);
+        
+        super.timerTaskHandler();
     }
     
     private void updateVelocity() {
@@ -130,20 +135,16 @@ public class Player extends Entity {
             case IDLE:
                 switch (facing) {
                     case UP: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_IDLE_UP_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_IDLE_UP_LIST);
                         break;
                     case DOWN:
-                     animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_IDLE_DOWN_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_IDLE_DOWN_LIST);
                         break;
                         case LEFT:
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_IDLE_LEFT_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_IDLE_LEFT_LIST);
                         break;
                     case RIGHT:
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_IDLE_RIGHT_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_IDLE_RIGHT_LIST);
                         break;
                 }
                 break;
@@ -151,20 +152,16 @@ public class Player extends Entity {
             case WALKING:
                 switch (facing) {
                     case UP: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_WALK_UP_LIST));
-                        animator.setDelayDurationMillis(ANIMATION_SPEED);
+                        setImageList(PImageManager.PLAYER_WALK_UP_LIST);
                         break;
                     case DOWN: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_WALK_DOWN_LIST));
-                        animator.setDelayDurationMillis(ANIMATION_SPEED);
+                        setImageList(PImageManager.PLAYER_WALK_DOWN_LIST);
                         break;
                     case LEFT: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_WALK_LEFT_LIST));
-                        animator.setDelayDurationMillis(ANIMATION_SPEED);
+                        setImageList(PImageManager.PLAYER_WALK_LEFT_LIST);
                         break;
                     case RIGHT: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_WALK_RIGHT_LIST));
-                        animator.setDelayDurationMillis(ANIMATION_SPEED);
+                        setImageList(PImageManager.PLAYER_WALK_RIGHT_LIST);
                         break;
                 }
                 break;
@@ -172,20 +169,16 @@ public class Player extends Entity {
             case JUMPING:
                 switch (facing) {
                     case UP: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_JUMP_UP_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_JUMP_UP_LIST);
                         break;
                     case DOWN: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_JUMP_DOWN_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_JUMP_DOWN_LIST);
                         break;
                     case LEFT: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_JUMP_LEFT_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_JUMP_LEFT_LIST);
                         break;
                     case RIGHT: 
-                        animator.setImageNames(getImageProvider().getImageList(PImageManager.PLAYER_JUMP_RIGHT_LIST));
-                        animator.setDelayDurationMillis(Integer.MAX_VALUE);
+                        setImageList(PImageManager.PLAYER_JUMP_RIGHT_LIST);
                         break;
                 }
                 break;
@@ -202,19 +195,21 @@ public class Player extends Entity {
     }
     
     private void updateFacingDirection() {
-        
-        if (getVelocity().y < 0) facing = Direction.UP;
-        else if (getVelocity().y > 0) facing = Direction.DOWN;
-        else {
-            if (getVelocity().x < 0) facing = Direction.LEFT;
-            else if (getVelocity().x > 0) facing = Direction.RIGHT;
-        }
-        
-    }
-    
-    private void updateImage() {
-        if (animator != null) {
-            setImage(animator.getCurrentImage());
+        Direction facingBackup = facing;
+        if (!directions.isEmpty()) facing = directions.get(directions.size() - 1);
+        switch (facing) {
+            case UP:
+                if (getVelocity().y >= 0) facing = facingBackup;
+                break;
+            case DOWN:
+                if (getVelocity().y <= 0) facing = facingBackup;
+                break;
+            case LEFT:
+                if (getVelocity().x >= 0) facing = facingBackup;
+                break;
+            case RIGHT:
+                if (getVelocity().x <= 0) facing = facingBackup;
+                break;
         }
     }
     
@@ -286,6 +281,10 @@ public class Player extends Entity {
     
     public int getScreenMinY() {
         return screenLimiter.getMinY();
+    }
+    
+    public boolean healthBlip() {
+        return health <= 2 && healthTimer.getRemainingDurationMillis() <= 100;
     }
     
     public int getScreenMaxY() {

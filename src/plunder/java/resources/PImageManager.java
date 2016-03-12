@@ -7,7 +7,10 @@ package plunder.java.resources;
 
 import images.ImageManager;
 import images.ResourceTools;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,9 +45,13 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String BAT_UP = "BAT_UP";
     public static final String BAT_DOWN = "BAT_DOWN";
     
+    
+    public static final String CONSUMABLE_HEART = "CONSUMABLE_HEART";
+    
     public static final String HEART_CONTAINER = "HEART_CONTAINER";
-    public static final String HALF_HEART_00 = "HALF_HEART_00";
-    public static final String HALF_HEART_01 = "HALF_HEART_01";
+    public static final String HALF_HEART_LEFT = "HALF_HEART_LEFT";
+    public static final String HALF_HEART_RIGHT = "HALF_HEART_RIGHT";
+    public static final String HEART_BLIP = "HEART_BLIP";
     
     public static final String HEALTH_METER_0 = "HEALTH_METER_0";
     public static final String HEALTH_METER_1 = "HEALTH_METER_1";
@@ -225,9 +232,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         
         BufferedImage playerSprites = (BufferedImage) ResourceTools.loadImageFromResource("plunder/resources/images/entity/player.png");
         
-        imageMap.put(HEART_CONTAINER, heartSprites.getSubimage(0, 0, 9, 8));
-        imageMap.put(HALF_HEART_00, heartSprites.getSubimage(9, 0, 5, 8));
-        imageMap.put(HALF_HEART_01, heartSprites.getSubimage(13, 0, 5, 8));
+        imageMap.put(HEART_CONTAINER, heartSprites.getSubimage(0, 0, 11, 10));
+        imageMap.put(HALF_HEART_LEFT, heartSprites.getSubimage(11, 0, 6, 10));
+        imageMap.put(HALF_HEART_RIGHT, heartSprites.getSubimage(16, 0, 6, 10));
+        imageMap.put(HEART_BLIP, heartSprites.getSubimage(22, 0, 11, 10));
         
         imageMap.put(BAT_UP, bat.getSubimage(0, 0, 9, 8));
         imageMap.put(BAT_DOWN, bat.getSubimage(9, 0, 9, 8));
@@ -274,6 +282,41 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         BufferedImage image = (BufferedImage) im.getImage(name);
         if (image == null) image = (BufferedImage) im.getImage(MISSING_TEXTURE);
         return image;
+    }
+    
+    @Override
+    public void drawTintedImage(Graphics2D graphics, BufferedImage image, int x, int y, int width, int height, Color tintColor) {
+        for (int pixelX = 0; pixelX < image.getWidth(); pixelX++) {
+            for (int pixelY = 0; pixelY < image.getHeight(); pixelY++) {
+                
+                int pixel = image.getRGB(pixelX, pixelY);
+                if( (pixel>>24) != 0x00 ) {        
+                
+                Color color = new Color(image.getRGB(pixelX, pixelY));
+                int red = color.getRed();
+                int green = color.getGreen();
+                int blue = color.getBlue();
+                int redTint = tintColor.getRed();
+                int greenTint = tintColor.getGreen();
+                int blueTint = tintColor.getBlue();
+                
+                int finalRed = red + ((redTint - red) * tintColor.getAlpha() / 255);
+                int finalGreen = green + ((greenTint - green) * tintColor.getAlpha() / 255);
+                int finalBlue = blue + ((blueTint - blue) * tintColor.getAlpha() / 255);
+                
+                Color newColor = new Color(finalRed, finalGreen, finalBlue, color.getAlpha());
+                
+                image.setRGB(pixelX, pixelY, newColor.getRGB());
+                }
+            }
+        }
+        
+        graphics.drawImage(image, x, y, width, height, null);
+        
+    }
+    
+    public void drawTint(Graphics2D graphics) {
+        
     }
     
     @Override

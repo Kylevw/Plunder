@@ -7,6 +7,7 @@ package plunder.java.main;
 
 import java.util.ArrayList;
 import plunder.java.entities.Enemy;
+import plunder.java.entities.Entity;
 import plunder.java.entities.Player;
 
 /**
@@ -17,9 +18,16 @@ public class EntityManager {
     
     public static Player player;
     public static ArrayList<Enemy> enemies = new ArrayList<>();
+    public static ArrayList<Entity> entities = new ArrayList<>();
     
     public static ArrayList<Enemy> getEnemies() {
         return enemies;
     }
+    
+    public static ArrayList<Entity> getEntities() {
+        return entities;
+    }
+    
+    
     
 }

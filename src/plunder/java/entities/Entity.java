@@ -7,6 +7,7 @@ package plunder.java.entities;
 
 import environment.Actor;
 import environment.Velocity;
+import images.Animator;
 import plunder.java.resources.PImageManager;
 import plunder.java.resources.ImageProviderIntf;
 import java.awt.Color;
@@ -29,8 +30,11 @@ public class Entity extends Actor{
     }
     
     private boolean onGround;
+    private int weight;
     
-    private boolean applyGravity = true;
+    private boolean despawn;
+    
+    private final Animator animator;
     
     private final Dimension size;
     private boolean drawBoundary;
@@ -39,10 +43,14 @@ public class Entity extends Actor{
     
     private final ImageProviderIntf ip;
     
-    public Entity(BufferedImage image, Point position, Dimension size, ImageProviderIntf ip) {
+    public Entity(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, String imageListName, int animationSpeed) {
         super(image, position, new Velocity(0, 0));
         this.size = size;
         this.ip = ip;
+        this.weight = weight;
+        if (this.weight < 0) this.weight = 0;
+        PImageManager im = new PImageManager();
+        this.animator = new Animator(im, ip.getImageList(imageListName), animationSpeed);
     }
     
     public Dimension getSize() {
@@ -50,7 +58,7 @@ public class Entity extends Actor{
     }
     
     public void timerTaskHandler() {
-        
+        updateImage();
     }
     
     @Override
@@ -113,12 +121,10 @@ public class Entity extends Actor{
     public void applyZVelocity() {
         zDisplacement += zVelocity;
         
-        if (applyGravity) {
-            if (zDisplacement <= 0) {
-                zDisplacement = 0;
-                zVelocity = 0;
-            } else accelerateZVelocity(-.5);
-        }
+        if (zDisplacement <= 0) {
+            zDisplacement = 0;
+            zVelocity = 0;
+        } else accelerateZVelocity(-.125 * weight);
     }
     
     public Rectangle getShadowRectangle() {
@@ -136,10 +142,6 @@ public class Entity extends Actor{
         getObjectGroundBoundary().intersects(entity.getObjectGroundBoundary());
     }
     
-    public void applyGravity(boolean applyGravity) {
-        this.applyGravity = applyGravity;
-    }
-    
     public void setImage(String image) {
         super.setImage(ip.getImage(image));
     }
@@ -150,6 +152,22 @@ public class Entity extends Actor{
     
     public boolean onGround() {
         return zDisplacement == 0;
+    }
+    
+    public void setDespawn(boolean despawn) {
+        this.despawn = despawn;
+    }
+    
+    public boolean despawn() {
+        return despawn;
+    }
+    
+    private void updateImage() {
+        if (animator != null) setImage(animator.getCurrentImage());
+    }
+    
+    public void setImageList(String listName) {
+        animator.setImageNames(getImageProvider().getImageList(listName));
     }
     
 }

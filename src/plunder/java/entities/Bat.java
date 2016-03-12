@@ -6,7 +6,6 @@
 package plunder.java.entities;
 
 import static environment.Utility.random;
-import images.Animator;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -31,9 +30,6 @@ public class Bat extends Enemy {
     private int ySpeed = 0;
     
     private final DurationTimer moveTimer;
-    private final DurationTimer attackTimer;
-    
-    private boolean attacking;
     
     private static final int IDLE_MOVEMENT_DELAY = 40;
     public static final int ATTACK_MOVEMENT_DELAY = 20;
@@ -50,17 +46,11 @@ public class Bat extends Enemy {
     private static final int ANIMATION_SPEED = 80;
     public static final Dimension SIZE = new Dimension(9, 8);
     
-    private final Animator animator;
-
     public Bat(Point position, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.BAT_UP), position, SIZE, ip, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE);
+        super(ip.getImage(PImageManager.BAT_UP), position, SIZE, 0, ip, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
         damage(1);
-        PImageManager im = new PImageManager();
-        this.animator = new Animator(im, getImageProvider().getImageList(PImageManager.BAT_LIST), ANIMATION_SPEED);
         moveTimer = new DurationTimer(IDLE_MOVEMENT_DELAY);
-        applyGravity(false);
         setZDisplacement(DEFAULT_Z_DISPLACEMENT);
-        attackTimer = new DurationTimer(ATTACK_DELAY);
     }
     
     @Override
@@ -70,29 +60,11 @@ public class Bat extends Enemy {
         }
         xSpeed += (random(3) - 1);
         ySpeed += (random(3) - 1);
+        //TODO Min-Max Method
         if (xSpeed > 1) xSpeed = 1;
         else if (xSpeed < -1) xSpeed = -1;
         if (ySpeed > 1) ySpeed = 1;
         else if (ySpeed < -1) ySpeed = -1;
-        
-        if (player != null) {
-            int testPoint = (int) TrigonometryCalculator.getHypotenuse(getPosition().x - EntityManager.player.getPosition().x, getPosition().y - EntityManager.player.getPosition().y);
-            if (!attackTimer.isComplete()) accelerateZVelocity(0.11);
-            if (testPoint <= getAttackDistance() && attackTimer.isComplete()) {
-                attackTimer.start();
-                setZVelocity(-1);
-                setVelocity(TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 3));
-            } else if (testPoint <= getSightDistance() && attackTimer.isComplete()) {
-                setVelocity(TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 2));
-                moveTimer.setDurationMillis(ATTACK_MOVEMENT_DELAY);
-            } else if (attackTimer.isComplete()) {
-                setVelocity(xSpeed, ySpeed);
-                moveTimer.setDurationMillis(IDLE_MOVEMENT_DELAY);
-            }
-        } else if (attackTimer.isComplete()) {
-            setVelocity(xSpeed, ySpeed);
-            moveTimer.setDurationMillis(IDLE_MOVEMENT_DELAY);
-        }
         
         if (getVelocity().x > 1) setVelocity(1, getVelocity().y);
         if (getVelocity().x < -1) setVelocity(-1, getVelocity().y);
@@ -107,9 +79,33 @@ public class Bat extends Enemy {
                 setZVelocity(0);
             }
         }
-        updateImage();
         super.timerTaskHandler();
+        
     }
+    
+    @Override
+    public void standardAI() {
+        setVelocity(xSpeed, ySpeed);
+        moveTimer.setDurationMillis(IDLE_MOVEMENT_DELAY);
+    }
+    
+    @Override
+    public void targetAI() {
+        setVelocity(TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 2));
+        moveTimer.setDurationMillis(ATTACK_MOVEMENT_DELAY);
+    }
+    
+    @Override
+    public void attackAI() {
+        accelerateZVelocity(0.11);
+    }
+    
+    @Override
+    public void startAttackAI() {
+        setZVelocity(-1);
+        setVelocity(TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 3));
+    }
+    
     
     @Override
     public Rectangle getObjectGroundBoundary() {
@@ -117,11 +113,4 @@ public class Bat extends Enemy {
         getPosition().y - (getSize().height),
         getSize().width - 2, getSize().height);
     }
-    
-    private void updateImage() {
-        if (animator != null) {
-            setImage(animator.getCurrentImage());
-        }
-    }
-
 }
