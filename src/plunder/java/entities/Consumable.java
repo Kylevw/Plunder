@@ -5,13 +5,12 @@
  */
 package plunder.java.entities;
 
+import environment.Velocity;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import plunder.java.main.EntityManager;
 import static plunder.java.main.EntityManager.player;
 import plunder.java.resources.ImageProviderIntf;
-import plunder.java.resources.PImageManager;
 
 /**
  *
@@ -19,19 +18,40 @@ import plunder.java.resources.PImageManager;
  */
 public class Consumable extends Entity{
 
-    public Consumable(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, int animationSpeed) {
-        super(image, position, size, weight, ip, PImageManager.PLAYER_WALK_DOWN_LIST, animationSpeed);
+    public Consumable(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, int weight, ImageProviderIntf ip, String imageNameList, int animationSpeed) {
+        super(image, position, size, weight, ip, imageNameList, animationSpeed);
+        setZDisplacement(zDisplacement);
+        setVelocity(velocity);
+        setZVelocity(zVelocity);
     }
     
     @Override
     public void timerTaskHandler() {
-        if (EntityManager.player != null && getObjectBoundary().intersects(EntityManager.player.getObjectBoundary()) && getObjectGroundBoundary().intersects(EntityManager.player.getObjectGroundBoundary())) {
+        
+        if (player != null && !despawn() && getObjectBoundary().intersects(player.getObjectBoundary()) && getObjectGroundBoundary().intersects(player.getObjectGroundBoundary())) {
             playerPickUp();
         }
+        
+        if ((int) (getZDisplacement() + getZVelocity()) <= 0) {
+            if ((int) getZVelocity() < 0) setZVelocity(-getZVelocity() * 2 / 3);
+            else if (getZDisplacement() == 0){
+                setVelocity(0, 0);
+            }
+        }
+        
+        super.timerTaskHandler();
+        
     }
     
     public void playerPickUp() {
         setDespawn(true);
+        getAnimator().initializeTimer();
+        player.displayItem((BufferedImage) getAnimator().getCurrentImage());
+        pickUpEvent();
+    }
+    
+    public void pickUpEvent() {
+        
     }
     
 }

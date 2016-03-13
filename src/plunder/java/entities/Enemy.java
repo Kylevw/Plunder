@@ -44,6 +44,9 @@ public class Enemy extends Entity {
     
     @Override
     public void timerTaskHandler() {
+        
+        if (health <= 0) setDespawn(true);
+        
         healthMeter.setHealth(health);
         healthMeter.setPosition(new Point(getPosition().x - 4, getPosition().y - getSize().height - getZDisplacement() - 3));
         
@@ -56,6 +59,10 @@ public class Enemy extends Entity {
             } else if (playerDistance <= getSightDistance() && attackTimer.isComplete()) targetAI();
             else if (attackTimer.isComplete()) standardAI();
         } else standardAI();
+        
+        if (player != null && player.getObjectGroundBoundary().intersects(getObjectGroundBoundary()) && player.getObjectBoundary().intersects(getObjectBoundary())) {
+            player.damage(strength);
+        }
         
         super.timerTaskHandler();
         
@@ -106,7 +113,8 @@ public class Enemy extends Entity {
     }
     
     public int getHealth() {
-        return health;
+        if (health < maxHealth) return health;
+        else return maxHealth;
     }
     
     public int getMaxHealth() {

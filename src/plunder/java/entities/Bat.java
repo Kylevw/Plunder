@@ -47,17 +47,14 @@ public class Bat extends Enemy {
     public static final Dimension SIZE = new Dimension(9, 8);
     
     public Bat(Point position, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.BAT_UP), position, SIZE, 0, ip, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
-        damage(1);
+        super(ip.getImage(PImageManager.BAT_00), position, SIZE, 0, ip, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
         moveTimer = new DurationTimer(IDLE_MOVEMENT_DELAY);
         setZDisplacement(DEFAULT_Z_DISPLACEMENT);
     }
     
     @Override
     public void timerTaskHandler() {
-        if (player != null && player.getObjectGroundBoundary().intersects(getObjectGroundBoundary()) && player.getObjectBoundary().intersects(getObjectBoundary())) {
-            player.damage(1);
-        }
+        
         xSpeed += (random(3) - 1);
         ySpeed += (random(3) - 1);
         //TODO Min-Max Method

@@ -5,11 +5,15 @@
  */
 package plunder.java.main;
 
+import static environment.Utility.random;
+import environment.Velocity;
 import plunder.java.resources.GameState;
 import plunder.java.resources.PImageManager;
 import plunder.java.entities.Player;
 import grid.Grid;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -17,12 +21,24 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import plunder.java.entities.Bat;
+import plunder.java.entities.Bomb;
+import plunder.java.entities.Consumable;
 import plunder.java.entities.Enemy;
 import plunder.java.entities.Entity;
+import plunder.java.entities.Explosion;
+import plunder.java.entities.Heart;
+import plunder.java.entities.PrimedBomb;
+import static plunder.java.main.EntityManager.bombs;
+import static plunder.java.main.EntityManager.consumables;
 import static plunder.java.main.EntityManager.enemies;
 import static plunder.java.main.EntityManager.entities;
+import static plunder.java.main.EntityManager.explosions;
 import static plunder.java.main.EntityManager.player;
 
 /**
@@ -78,22 +94,26 @@ class Environment extends environment.Environment {
         environmentGrid.setRows(y / environmentGrid.getCellHeight());
     }
 
+    Font gamefont, gamefont_7;
+
     @Override
     public void initializeEnvironment() {
+        try {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            InputStream input = classLoader.getResourceAsStream("plunder/resources/fonts/gamefont.ttf");
+
+            gamefont = Font.createFont(Font.TRUETYPE_FONT, input);
+            gamefont_7 = gamefont.deriveFont((float)7.0);
+
+        } catch (FontFormatException ex) {
+            Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void timerTaskHandler() {
-        
-        entities = new ArrayList<>();
-        if (player != null) entities.add(player);
-        if (enemies != null) entities.addAll(EntityManager.getEnemies());
-        
-        entities.sort((Entity e1, Entity e2) -> {
-            final int y1 = e1.getPosition().y;
-            final int y2 = e2.getPosition().y;
-            return y1 < y2 ? -1 : y1 > y2 ? 1 : 0;
-        });
         
         if (player != null && player.despawn()) player = null;
         
@@ -101,15 +121,47 @@ class Environment extends environment.Environment {
         EntityManager.getEnemies().stream().forEach((enemy) -> {
             if (enemy.despawn()) removeEnemies.add(enemy);
         });
-        
         enemies.removeAll(removeEnemies);
         
+        ArrayList<Consumable> removeConsumables = new ArrayList<>();
+        EntityManager.getConsumables().stream().forEach((consumable) -> {
+            if (consumable.despawn()) removeConsumables.add(consumable);
+        });
+        consumables.removeAll(removeConsumables);
         
+        ArrayList<PrimedBomb> removeBombs = new ArrayList<>();
+        EntityManager.getBombs().stream().forEach((bomb) -> {
+            if (bomb.despawn()) removeBombs.add(bomb);
+        });
+        bombs.removeAll(removeBombs);
+        
+        ArrayList<Explosion> removeExplosions = new ArrayList<>();
+        EntityManager.getExplosions().stream().forEach((explosion) -> {
+            if (explosion.despawn()) removeExplosions.add(explosion);
+        });
+        explosions.removeAll(removeExplosions);
+        
+        entities = new ArrayList<>();
+        if (player != null) entities.add(player);
+        if (enemies != null) entities.addAll(EntityManager.getEnemies());
+        if (consumables != null) entities.addAll(EntityManager.getConsumables());
+        if (bombs != null) entities.addAll(EntityManager.getBombs());
+        
+        entities.sort((Entity e1, Entity e2) -> {
+            final int y1 = e1.getPosition().y;
+            final int y2 = e2.getPosition().y;
+            return y1 < y2 ? -1 : y1 > y2 ? 1 : 0;
+        });
         
         if (!paused) {
             if (entities != null) {
                 EntityManager.getEntities().stream().forEach((entity) -> {
                     entity.timerTaskHandler();
+                });
+            }
+            if (explosions != null) {
+                EntityManager.getExplosions().stream().forEach((explosion) -> {
+                    explosion.timerTaskHandler();
                 });
             }
         }
@@ -126,9 +178,29 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_A && !player.getDirections().contains(Direction.LEFT)) player.addDirection(Direction.LEFT);
             else if (e.getKeyCode() == KeyEvent.VK_D && !player.getDirections().contains(Direction.RIGHT)) player.addDirection(Direction.RIGHT);
             
-            if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
+            else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
-            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) paused = !paused;
+            else if (e.getKeyCode() == KeyEvent.VK_E && player != null) {
+                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 1.5, im));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_Q && player != null) {
+                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_F && player != null) {
+                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_G && player != null) {
+                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_J && player != null) {
+                player.useBomb();
+            }
+
+            else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) paused = !paused;
         }
     }
 
@@ -234,11 +306,13 @@ class Environment extends environment.Environment {
             placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 0, 1);
             placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, 1);
             
-            
 //            environmentGrid.paintComponent(graphics);
             
-            
         }
+        
+        EntityManager.getExplosions().stream().forEach((explosion) -> {
+            explosion.draw(graphics);
+        });
         
         EntityManager.getEntities().stream().forEach((entity) -> {
             entity.draw(graphics);
@@ -249,14 +323,20 @@ class Environment extends environment.Environment {
         if (player != null) {
             for (int i = 0; i < player.getMaxHealth() / 2; i++) {
                 graphics.drawImage(im.getImage(PImageManager.HEART_CONTAINER), 2 + (i % HEARTS_PER_ROW * 10), 2 + ((i / HEARTS_PER_ROW) * 9), 11, 10, null);
+                if (player.healthBlip()) graphics.drawImage(im.getImage(PImageManager.HEART_BLIP), 2 + (i % HEARTS_PER_ROW * 10), 2 + ((i / HEARTS_PER_ROW) * 9), 11, 10, null);
             }
+            
             for (int i = 0; i < player.getHealth(); i++) {
                 if (i % 2 == 0) graphics.drawImage(im.getImage(PImageManager.HALF_HEART_LEFT), 2 + ((i % (HEARTS_PER_ROW * 2) / 2) * 10), 2 + ((i / (HEARTS_PER_ROW * 2)) * 9), 6, 10, null);
                 else graphics.drawImage(im.getImage(PImageManager.HALF_HEART_RIGHT), 7 + ((i % (HEARTS_PER_ROW * 2) / 2) * 10), 2 + ((i / (HEARTS_PER_ROW * 2)) * 9), 6, 10, null);
             }
-
-            if (player.healthBlip()) graphics.drawImage(im.getImage(PImageManager.HEART_BLIP), 2, 2, 11, 10, null);
-        }
+            graphics.drawImage(im.getImage(PImageManager.CONSUMABLE_BOMB_00), 5, 12 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9), 5, 7, null);
+            graphics.setFont(gamefont_7);
+            graphics.setColor(new Color(0, 0, 0, 80));
+            graphics.drawString("x" + player.getBombCount(), 12, 19 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
+            graphics.setColor(Color.WHITE);
+            graphics.drawString("x" + player.getBombCount(), 11, 18 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));        }
+        
         
 //        im.drawTintedImage(graphics, im.getImage(PImageManager.PLAYER_IDLE_DOWN_00), 10, 10, 16, 16, new Color(255, 0, 0, 50));
         

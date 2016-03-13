@@ -5,6 +5,7 @@
  */
 package plunder.java.entities;
 
+import environment.Velocity;
 import java.awt.Dimension;
 import plunder.java.main.ActionState;
 import plunder.java.main.Direction;
@@ -14,7 +15,9 @@ import plunder.java.main.ScreenLimitProviderIntf;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import static plunder.java.main.EntityManager.bombs;
 import timer.DurationTimer;
 
 /**
@@ -25,11 +28,15 @@ public class Player extends Entity {
     
     private static final int PLAYER_WIDTH = 16;
     private static final int PLAYER_HEIGHT = 16;
-    private int health, maxHealth;
+    private int health, maxHealth, bombCount;
     
     private static final int WEIGHT = 4;
     private final DurationTimer invulTimer;
     private final DurationTimer healthTimer;
+    private final DurationTimer healthMeterBlinkTimer;
+    private final DurationTimer itemDisplayTimer;
+    
+    private BufferedImage displayItemImage;
     
     {
         actionState = ActionState.IDLE;
@@ -64,7 +71,7 @@ public class Player extends Entity {
 
         super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), WEIGHT, ip, PImageManager.PLAYER_WALK_DOWN_LIST, ANIMATION_SPEED);
         this.directions = new ArrayList<>();
-        maxHealth = 12;
+        maxHealth = 6;
         health = maxHealth;
         this.environmentPosition = new Point(position);
         this.displacementPosition = new Point(0, 0);
@@ -73,15 +80,20 @@ public class Player extends Entity {
         
         invulTimer = new DurationTimer(1200);
         healthTimer = new DurationTimer(1600);
+        healthMeterBlinkTimer = new DurationTimer(200);
+        itemDisplayTimer = new DurationTimer(600);
     }
     
     @Override
     public void draw(Graphics2D graphics) {
+        if (displayItemImage != null) graphics.drawImage(displayItemImage, null, getPosition().x - ((displayItemImage.getWidth() + 1) / 2), getPosition().y - PLAYER_WIDTH - displayItemImage.getHeight() - 1);
         if (invulTimer.getRemainingDurationMillis() / 80 % 2 == 0) super.draw(graphics);
     }
     
     @Override
     public void timerTaskHandler() {
+        
+        if (displayItemImage != null && itemDisplayTimer.isComplete()) displayItemImage = null;
         
         if (health <= 0) {
             setDespawn(true);
@@ -147,7 +159,7 @@ public class Player extends Entity {
                         setImageList(PImageManager.PLAYER_IDLE_RIGHT_LIST);
                         break;
                 }
-                break;
+            break;
                 
             case WALKING:
                 switch (facing) {
@@ -164,7 +176,7 @@ public class Player extends Entity {
                         setImageList(PImageManager.PLAYER_WALK_RIGHT_LIST);
                         break;
                 }
-                break;
+            break;
             
             case JUMPING:
                 switch (facing) {
@@ -181,10 +193,8 @@ public class Player extends Entity {
                         setImageList(PImageManager.PLAYER_JUMP_RIGHT_LIST);
                         break;
                 }
-                break;
-            
+            break;
         }
-        
     }
     
     @Override
@@ -236,7 +246,8 @@ public class Player extends Entity {
     }
     
     public int getHealth() {
-        return health;
+        if (health < maxHealth) return health;
+        else return maxHealth;
     }
     
     public int getMaxHealth() {
@@ -284,11 +295,50 @@ public class Player extends Entity {
     }
     
     public boolean healthBlip() {
-        return health <= 2 && healthTimer.getRemainingDurationMillis() <= 100;
+        return health <= 2 && healthTimer.getRemainingDurationMillis() <= 100 || !healthMeterBlinkTimer.isComplete();
     }
     
     public int getScreenMaxY() {
         return screenLimiter.getMaxY() - (getSize().height / 2);
     }
     
+    public void heal(int health) {
+        this.health += health;
+        healthMeterBlinkTimer.start();
+    }
+    
+    public void displayItem(BufferedImage displayItemImage) {
+        this.displayItemImage = displayItemImage;
+        itemDisplayTimer.start();
+    }
+    
+    public void addBombs(int bombs) {
+        bombCount += bombs;
+    }
+    
+    public void useBomb() {
+        if (bombCount > 0) {
+            Velocity bombVelocity = new Velocity(0, 0);
+            switch (facing) {
+                case UP:
+                    bombVelocity = new Velocity(0, -2);
+                    break;
+                case DOWN:
+                    bombVelocity = new Velocity(0, 2);
+                    break;
+                case LEFT:
+                    bombVelocity = new Velocity(-2, 0);
+                    break;
+                case RIGHT:
+                    bombVelocity = new Velocity(2, 0);
+                    break;
+            }
+            bombs.add(new PrimedBomb(new Point(getPosition().x, getPosition().y), 3, new Velocity(bombVelocity.x + (getVelocity().x / 2), bombVelocity.y + (getVelocity().y / 2)), 3, getImageProvider()));
+            bombCount--;
+        }
+    }
+    
+    public int getBombCount() {
+        return bombCount;
+    }
 }

@@ -16,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import static plunder.java.main.EntityManager.explosions;
 
 /**
  *
@@ -31,6 +32,9 @@ public class Entity extends Actor{
     
     private boolean onGround;
     private int weight;
+    
+    private boolean explode;
+    private int explosionSize;
     
     private boolean despawn;
     
@@ -59,6 +63,10 @@ public class Entity extends Actor{
     
     public void timerTaskHandler() {
         updateImage();
+        if (explode) {
+            explosions.add(new Explosion(getPosition(), explosionSize));
+            setDespawn(true);
+        }
     }
     
     @Override
@@ -83,7 +91,7 @@ public class Entity extends Actor{
     
     public Rectangle getObjectGroundBoundary() {
         return new Rectangle(getPosition().x - (size.width / 2),
-        getPosition().y - (size.height),
+        getPosition().y - size.height,
         size.width, size.height);
     }
     
@@ -95,11 +103,16 @@ public class Entity extends Actor{
         return zDisplacement;
     }
     
-    public int getZVelocity() {
-        return (int) zVelocity;
+    public void explode(int explosionSize) {
+        this.explosionSize = explosionSize;
+        explode = true;
     }
     
-    public void setZVelocity(int zVelocity) {
+    public double getZVelocity() {
+        return zVelocity;
+    }
+    
+    public void setZVelocity(double zVelocity) {
         this.zVelocity = zVelocity;
     }
     
@@ -110,7 +123,6 @@ public class Entity extends Actor{
     public void setZDisplacement(int zDisplacement) {
         this.zDisplacement = zDisplacement;
     }
-    
     
     @Override
     public void move() {
@@ -128,9 +140,9 @@ public class Entity extends Actor{
     }
     
     public Rectangle getShadowRectangle() {
-        int shadowWidth = getObjectGroundBoundary().width - 4 - (zDisplacement / 4 * 2);
+        int shadowWidth = getObjectGroundBoundary().width - ((1 + (getObjectGroundBoundary().width / 6)) * 2) - (zDisplacement / 4 * 2);
         if (shadowWidth < 0) shadowWidth = 0;
-        return new Rectangle(getObjectGroundBoundary().x + 2 + (zDisplacement / 4), getObjectGroundBoundary().y + 2 + (getObjectGroundBoundary().height / 2) + (zDisplacement / 4), shadowWidth, shadowWidth);
+        return new Rectangle(getObjectGroundBoundary().x + (1 + (getObjectGroundBoundary().width / 6)) + (zDisplacement / 4), getObjectGroundBoundary().y + (1 + (getObjectGroundBoundary().width / 6)) + (getObjectGroundBoundary().height / 2) + (zDisplacement / 4), shadowWidth, shadowWidth);
     }
     
     public boolean drawBoundary() {
@@ -144,6 +156,10 @@ public class Entity extends Actor{
     
     public void setImage(String image) {
         super.setImage(ip.getImage(image));
+    }
+    
+    public Animator getAnimator() {
+        return animator;
     }
     
     public ImageProviderIntf getImageProvider() {
