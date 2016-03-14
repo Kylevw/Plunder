@@ -9,6 +9,7 @@ import environment.Velocity;
 import java.awt.Dimension;
 import java.awt.Point;
 import static plunder.java.main.EntityManager.explosions;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
 import timer.DurationTimer;
@@ -27,8 +28,8 @@ public class PrimedBomb extends Entity{
     private static final int WEIGHT = 3;
     private static final int FUSE_DELAY = 1000;
 
-    public PrimedBomb(Point position, int zDisplacement, Velocity velocity, int zVelocity, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.PRIMED_BOMB_00), position, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, PImageManager.PRIMED_BOMB_LIST, ANIMATION_SPEED);
+    public PrimedBomb(Point position, int zDisplacement, Velocity velocity, int zVelocity, ImageProviderIntf ip, AudioPlayerIntf ap) {
+        super(ip.getImage(PImageManager.PRIMED_BOMB_00), position, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, ap, PImageManager.PRIMED_BOMB_LIST, ANIMATION_SPEED);
         setZDisplacement(zDisplacement);
         setVelocity(velocity);
         setZVelocity(zVelocity);
@@ -49,8 +50,7 @@ public class PrimedBomb extends Entity{
         }
         
         if (bombTimer.isComplete()) {
-            explosions.add(new Explosion(getPosition(), 2));
-            setDespawn(true);
+            explode(2);
         }
         
     }

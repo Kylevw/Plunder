@@ -17,6 +17,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import static plunder.java.main.EntityManager.explosions;
+import plunder.java.resources.AudioPlayerIntf;
 
 /**
  *
@@ -46,9 +47,11 @@ public class Entity extends Actor{
     private double zVelocity;
     
     private final ImageProviderIntf ip;
+    private final AudioPlayerIntf ap;
     
-    public Entity(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, String imageListName, int animationSpeed) {
+    public Entity(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed) {
         super(image, position, new Velocity(0, 0));
+        this.ap = ap;
         this.size = size;
         this.ip = ip;
         this.weight = weight;
@@ -64,7 +67,7 @@ public class Entity extends Actor{
     public void timerTaskHandler() {
         updateImage();
         if (explode) {
-            explosions.add(new Explosion(getPosition(), explosionSize));
+            explosions.add(new Explosion(getPosition(), explosionSize, ap));
             setDespawn(true);
         }
     }
@@ -164,6 +167,10 @@ public class Entity extends Actor{
     
     public ImageProviderIntf getImageProvider() {
         return ip;
+    }
+    
+    public AudioPlayerIntf getAudioPlayer() {
+        return ap;
     }
     
     public boolean onGround() {

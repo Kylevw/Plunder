@@ -40,6 +40,7 @@ import static plunder.java.main.EntityManager.enemies;
 import static plunder.java.main.EntityManager.entities;
 import static plunder.java.main.EntityManager.explosions;
 import static plunder.java.main.EntityManager.player;
+import plunder.java.resources.AudioManager;
 
 /**
  *
@@ -66,22 +67,24 @@ class Environment extends environment.Environment {
     private int yTranslation;
     
     PImageManager im;
+    AudioManager am;
 
     public Environment() {
         
         gameState = GameState.ENVIRONMENT;
         im = new PImageManager();
+        am = new AudioManager();
         
         environmentGrid = new Grid
         (DEFAULT_WINDOW_WIDTH / GRID_CELL_SIZE, DEFAULT_WINDOW_HEIGHT / GRID_CELL_SIZE * 2, GRID_CELL_SIZE, GRID_CELL_SIZE, new Point(-DEFAULT_WINDOW_X, -DEFAULT_WINDOW_Y), Color.BLACK);
         
         updateGrid(2, 2);
         
-        enemies.add(new Bat(new Point(100, 0), im));
-        enemies.add(new Bat(new Point(100, 40), im));
-        enemies.add(new Bat(new Point(100, -40), im));
+        enemies.add(new Bat(new Point(100, 0), im, am));
+        enemies.add(new Bat(new Point(100, 40), im, am));
+        enemies.add(new Bat(new Point(100, -40), im, am));
         
-        player = new Player(new Point(0, 0), new PlayerScreenLimitProvider(environmentGrid.getGridSize().width - DEFAULT_WINDOW_WIDTH, environmentGrid.getGridSize().height - DEFAULT_WINDOW_HEIGHT), im);
+        player = new Player(new Point(0, 0), new PlayerScreenLimitProvider(environmentGrid.getGridSize().width - DEFAULT_WINDOW_WIDTH, environmentGrid.getGridSize().height - DEFAULT_WINDOW_HEIGHT), im, am);
     }
     
     private void updateGrid(double xScreens, double yScreens) {
@@ -94,7 +97,7 @@ class Environment extends environment.Environment {
         environmentGrid.setRows(y / environmentGrid.getCellHeight());
     }
 
-    Font gamefont, gamefont_7;
+    Font gamefont, gamefont_7, gamefont_14;
 
     @Override
     public void initializeEnvironment() {
@@ -104,6 +107,7 @@ class Environment extends environment.Environment {
 
             gamefont = Font.createFont(Font.TRUETYPE_FONT, input);
             gamefont_7 = gamefont.deriveFont((float)7.0);
+            gamefont_14 = gamefont.deriveFont((float)14.0);
 
         } catch (FontFormatException ex) {
             Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
@@ -181,19 +185,19 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
             else if (e.getKeyCode() == KeyEvent.VK_E && player != null) {
-                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 1.5, im));
+                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 1.5, im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_Q && player != null) {
-                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im));
+                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_F && player != null) {
-                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im));
+                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_G && player != null) {
-                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im));
+                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_J && player != null) {
@@ -335,8 +339,14 @@ class Environment extends environment.Environment {
             graphics.setColor(new Color(0, 0, 0, 80));
             graphics.drawString("x" + player.getBombCount(), 12, 19 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
             graphics.setColor(Color.WHITE);
-            graphics.drawString("x" + player.getBombCount(), 11, 18 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));        }
+            graphics.drawString("x" + player.getBombCount(), 11, 18 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
+        }
         
+        for (int i = 0; i < 7; i++) {
+            graphics.drawImage(im.getImage(PImageManager.INVENTORY_SLOT), 222 + (i * 16), 2, 16, 16, null);
+        }
+        graphics.drawImage(im.getImage(PImageManager.ITEM_SWORD), 225, 5, 10, 10, null);
+        graphics.drawImage(im.getImage(PImageManager.ITEM_BOW), 241, 5, 10, 10, null);
         
 //        im.drawTintedImage(graphics, im.getImage(PImageManager.PLAYER_IDLE_DOWN_00), 10, 10, 16, 16, new Color(255, 0, 0, 50));
         

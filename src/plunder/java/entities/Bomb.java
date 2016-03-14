@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import static plunder.java.main.EntityManager.player;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
 
@@ -29,9 +30,8 @@ public class Bomb extends Consumable {
     private static final int HEIGHT = 7;
 
     
-    public Bomb(Point position, int zDisplacement, Velocity velocity, double zVelocity, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.CONSUMABLE_BOMB_00), position, zDisplacement, velocity, zVelocity, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, PImageManager.CONSUMABLE_BOMB_LIST, ANIMATION_SPEED);
-        
+    public Bomb(Point position, int zDisplacement, Velocity velocity, double zVelocity, ImageProviderIntf ip, AudioPlayerIntf ap) {
+        super(ip.getImage(PImageManager.CONSUMABLE_BOMB_00), position, zDisplacement, velocity, zVelocity, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, ap, PImageManager.CONSUMABLE_BOMB_LIST, ANIMATION_SPEED);
     }
     
     @Override

@@ -18,6 +18,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import static plunder.java.main.EntityManager.bombs;
+import plunder.java.resources.AudioPlayerIntf;
 import timer.DurationTimer;
 
 /**
@@ -64,12 +65,13 @@ public class Player extends Entity {
      * @param position the current position of the entity on screen
      * @param screenLimiter inputs the minimum and maximum positions for the camera
      * @param ip the PImageManager for the entity
+     * @param ap the AudioManager for the entity
      * 
      */
     
-    public Player(Point position, ScreenLimitProviderIntf screenLimiter, ImageProviderIntf ip) {
+    public Player(Point position, ScreenLimitProviderIntf screenLimiter, ImageProviderIntf ip, AudioPlayerIntf ap) {
 
-        super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), WEIGHT, ip, PImageManager.PLAYER_WALK_DOWN_LIST, ANIMATION_SPEED);
+        super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), WEIGHT, ip, ap, PImageManager.PLAYER_WALK_DOWN_LIST, ANIMATION_SPEED);
         this.directions = new ArrayList<>();
         maxHealth = 6;
         health = maxHealth;
@@ -86,7 +88,7 @@ public class Player extends Entity {
     
     @Override
     public void draw(Graphics2D graphics) {
-        if (displayItemImage != null) graphics.drawImage(displayItemImage, null, getPosition().x - ((displayItemImage.getWidth() + 1) / 2), getPosition().y - PLAYER_WIDTH - displayItemImage.getHeight() - 1);
+        if (displayItemImage != null) graphics.drawImage(displayItemImage, null, getPosition().x - ((displayItemImage.getWidth() + 1) / 2), getPosition().y - PLAYER_WIDTH - displayItemImage.getHeight() - 1 - getZDisplacement());
         if (invulTimer.getRemainingDurationMillis() / 80 % 2 == 0) super.draw(graphics);
     }
     
@@ -333,7 +335,7 @@ public class Player extends Entity {
                     bombVelocity = new Velocity(2, 0);
                     break;
             }
-            bombs.add(new PrimedBomb(new Point(getPosition().x, getPosition().y), 3, new Velocity(bombVelocity.x + (getVelocity().x / 2), bombVelocity.y + (getVelocity().y / 2)), 3, getImageProvider()));
+            bombs.add(new PrimedBomb(new Point(getPosition().x, getPosition().y), 3, new Velocity(bombVelocity.x + (getVelocity().x / 2), bombVelocity.y + (getVelocity().y / 2)), 3, getImageProvider(), getAudioPlayer()));
             bombCount--;
         }
     }

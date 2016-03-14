@@ -22,6 +22,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     
     private static final String MISSING_TEXTURE = "MISSING_TEXTURE";
     
+    public static final String INVENTORY_SLOT = "INVENTORY_SLOT";
+    public static final String ITEM_SWORD = "ITEM_SWORD";
+    public static final String ITEM_BOW = "ITEM_BOW";
+    
     public static final String SAND_TILE = "SAND_TILE";
     public static final String BRICK_TILE = "BRICK_TILE";
     
@@ -290,6 +294,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         
         imageMap.put(MISSING_TEXTURE, ResourceTools.loadImageFromResource("plunder/resources/images/utility/missing_texture.png"));
         imageMap.put(ENTITY_SHADOW, ResourceTools.loadImageFromResource("plunder/resources/images/utility/entity_shadow.png"));
+        
+        imageMap.put(INVENTORY_SLOT, ResourceTools.loadImageFromResource("plunder/resources/images/utility/inventory_slot.png"));
+        imageMap.put(ITEM_SWORD, ResourceTools.loadImageFromResource("plunder/resources/images/item/sword.png"));
+        imageMap.put(ITEM_BOW, ResourceTools.loadImageFromResource("plunder/resources/images/item/bow.png"));
         
         imageMap.put(SAND_TILE, ResourceTools.loadImageFromResource("plunder/resources/images/utility/sand_tile.png"));
         imageMap.put(BRICK_TILE, ResourceTools.loadImageFromResource("plunder/resources/images/utility/brick_tile.png"));

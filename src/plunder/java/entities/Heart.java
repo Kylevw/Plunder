@@ -9,6 +9,7 @@ import environment.Velocity;
 import java.awt.Dimension;
 import java.awt.Point;
 import static plunder.java.main.EntityManager.player;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
 import timer.DurationTimer;
@@ -34,8 +35,8 @@ public class Heart extends Consumable {
     private final DurationTimer moveTimer;
     private static final int MOVE_DELAY = 100;
     
-    public Heart(Point position, int zDisplacement, Velocity velocity, double zVelocity, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.CONSUMABLE_HEART_00), position, zDisplacement, velocity, zVelocity, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, PImageManager.CONSUMABLE_HEART_LIST, ANIMATION_SPEED);
+    public Heart(Point position, int zDisplacement, Velocity velocity, double zVelocity, ImageProviderIntf ip, AudioPlayerIntf ap) {
+        super(ip.getImage(PImageManager.CONSUMABLE_HEART_00), position, zDisplacement, velocity, zVelocity, new Dimension(WIDTH, HEIGHT), WEIGHT, ip, ap, PImageManager.CONSUMABLE_HEART_LIST, ANIMATION_SPEED);
         moveTimer = new DurationTimer(MOVE_DELAY);
     }
     

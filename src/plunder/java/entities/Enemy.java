@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import path.TrigonometryCalculator;
 import static plunder.java.main.EntityManager.player;
 import plunder.java.main.HealthMeter;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import timer.DurationTimer;
 
@@ -30,8 +31,8 @@ public class Enemy extends Entity {
     private final int maxHealth, strength, defense;
     private int health;
 
-    public Enemy(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, String imageListName, int animationSpeed, int maxHealth, int strength, int defense, int sightDistance, int attackDistance, int attackDelay) {
-        super(image, position, size, weight, ip, imageListName, animationSpeed);
+    public Enemy(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed, int maxHealth, int strength, int defense, int sightDistance, int attackDistance, int attackDelay) {
+        super(image, position, size, weight, ip, ap, imageListName, animationSpeed);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
         this.strength = strength;

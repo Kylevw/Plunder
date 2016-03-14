@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import static plunder.java.main.EntityManager.player;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 
 /**
@@ -18,8 +19,8 @@ import plunder.java.resources.ImageProviderIntf;
  */
 public class Consumable extends Entity{
 
-    public Consumable(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, int weight, ImageProviderIntf ip, String imageNameList, int animationSpeed) {
-        super(image, position, size, weight, ip, imageNameList, animationSpeed);
+    public Consumable(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageNameList, int animationSpeed) {
+        super(image, position, size, weight, ip, ap, imageNameList, animationSpeed);
         setZDisplacement(zDisplacement);
         setVelocity(velocity);
         setZVelocity(zVelocity);
@@ -45,7 +46,6 @@ public class Consumable extends Entity{
     
     public void playerPickUp() {
         setDespawn(true);
-        getAnimator().initializeTimer();
         player.displayItem((BufferedImage) getAnimator().getCurrentImage());
         pickUpEvent();
     }

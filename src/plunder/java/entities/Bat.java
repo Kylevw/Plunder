@@ -11,7 +11,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import path.TrigonometryCalculator;
 import plunder.java.main.EntityManager;
-import static plunder.java.main.EntityManager.player;
+import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
 import timer.DurationTimer;
@@ -46,8 +46,8 @@ public class Bat extends Enemy {
     private static final int ANIMATION_SPEED = 80;
     public static final Dimension SIZE = new Dimension(9, 8);
     
-    public Bat(Point position, ImageProviderIntf ip) {
-        super(ip.getImage(PImageManager.BAT_00), position, SIZE, 0, ip, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
+    public Bat(Point position, ImageProviderIntf ip, AudioPlayerIntf ap) {
+        super(ip.getImage(PImageManager.BAT_00), position, SIZE, 0, ip, ap, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
         moveTimer = new DurationTimer(IDLE_MOVEMENT_DELAY);
         setZDisplacement(DEFAULT_Z_DISPLACEMENT);
     }
