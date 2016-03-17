@@ -17,6 +17,7 @@ import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -26,6 +27,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import plunder.java.entities.Arrow;
+import plunder.java.entities.ProjectileArrow;
 import plunder.java.entities.Bat;
 import plunder.java.entities.Bomb;
 import plunder.java.entities.Consumable;
@@ -34,12 +37,14 @@ import plunder.java.entities.Entity;
 import plunder.java.entities.Explosion;
 import plunder.java.entities.Heart;
 import plunder.java.entities.PrimedBomb;
+import plunder.java.entities.Projectile;
 import static plunder.java.main.EntityManager.bombs;
 import static plunder.java.main.EntityManager.consumables;
 import static plunder.java.main.EntityManager.enemies;
 import static plunder.java.main.EntityManager.entities;
 import static plunder.java.main.EntityManager.explosions;
 import static plunder.java.main.EntityManager.player;
+import static plunder.java.main.EntityManager.projectiles;
 import plunder.java.resources.AudioManager;
 
 /**
@@ -79,10 +84,6 @@ class Environment extends environment.Environment {
         (DEFAULT_WINDOW_WIDTH / GRID_CELL_SIZE, DEFAULT_WINDOW_HEIGHT / GRID_CELL_SIZE * 2, GRID_CELL_SIZE, GRID_CELL_SIZE, new Point(-DEFAULT_WINDOW_X, -DEFAULT_WINDOW_Y), Color.BLACK);
         
         updateGrid(2, 2);
-        
-        enemies.add(new Bat(new Point(100, 0), im, am));
-        enemies.add(new Bat(new Point(100, 40), im, am));
-        enemies.add(new Bat(new Point(100, -40), im, am));
         
         player = new Player(new Point(0, 0), new PlayerScreenLimitProvider(environmentGrid.getGridSize().width - DEFAULT_WINDOW_WIDTH, environmentGrid.getGridSize().height - DEFAULT_WINDOW_HEIGHT), im, am);
     }
@@ -145,11 +146,18 @@ class Environment extends environment.Environment {
         });
         explosions.removeAll(removeExplosions);
         
+        ArrayList<Projectile> removeProjectiles = new ArrayList<>();
+        EntityManager.getProjectiles().stream().forEach((projectile) -> {
+            if (projectile.despawn()) removeProjectiles.add(projectile);
+        });
+        projectiles.removeAll(removeProjectiles);
+        
         entities = new ArrayList<>();
         if (player != null) entities.add(player);
         if (enemies != null) entities.addAll(EntityManager.getEnemies());
         if (consumables != null) entities.addAll(EntityManager.getConsumables());
         if (bombs != null) entities.addAll(EntityManager.getBombs());
+        if (projectiles != null) entities.addAll(EntityManager.getProjectiles());
         
         entities.sort((Entity e1, Entity e2) -> {
             final int y1 = e1.getPosition().y;
@@ -174,7 +182,7 @@ class Environment extends environment.Environment {
     
     @Override
     public void keyPressedHandler(KeyEvent e) {
-        // Uses the Arrow Keys to control the player
+        // Uses the ProjectileArrow Keys to control the player
         if (player != null) {
             // Once pressing a key, it adds said key to the Directions list.
             if (e.getKeyCode() == KeyEvent.VK_W && !player.getDirections().contains(Direction.UP)) player.addDirection(Direction.UP);
@@ -182,10 +190,19 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_A && !player.getDirections().contains(Direction.LEFT)) player.addDirection(Direction.LEFT);
             else if (e.getKeyCode() == KeyEvent.VK_D && !player.getDirections().contains(Direction.RIGHT)) player.addDirection(Direction.RIGHT);
             
+            else if (e.getKeyCode() == KeyEvent.VK_UP && !player.getBowDirections().contains(Direction.UP)) player.addBowDirection(Direction.UP);
+            else if (e.getKeyCode() == KeyEvent.VK_DOWN && !player.getBowDirections().contains(Direction.DOWN)) player.addBowDirection(Direction.DOWN);
+            else if (e.getKeyCode() == KeyEvent.VK_LEFT && !player.getBowDirections().contains(Direction.LEFT)) player.addBowDirection(Direction.LEFT);
+            else if (e.getKeyCode() == KeyEvent.VK_RIGHT && !player.getBowDirections().contains(Direction.RIGHT)) player.addBowDirection(Direction.RIGHT);
+            
             else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
             else if (e.getKeyCode() == KeyEvent.VK_E && player != null) {
                 consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 1.5, im, am));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_R && player != null) {
+                consumables.add(new Arrow(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_Q && player != null) {
@@ -204,7 +221,12 @@ class Environment extends environment.Environment {
                 player.useBomb();
             }
 
+            else if (e.getKeyCode() == KeyEvent.VK_Z && player != null) {
+                enemies.add(new Bat(new Point(player.getPosition().x, player.getPosition().y - 80), im, am));
+            }
+            
             else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) paused = !paused;
+            
         }
     }
 
@@ -216,6 +238,11 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_S && player.getDirections().contains(Direction.DOWN)) player.removeDirection(Direction.DOWN);
             else if (e.getKeyCode() == KeyEvent.VK_A && player.getDirections().contains(Direction.LEFT)) player.removeDirection(Direction.LEFT);
             else if (e.getKeyCode() == KeyEvent.VK_D && player.getDirections().contains(Direction.RIGHT)) player.removeDirection(Direction.RIGHT);
+            
+            else if (e.getKeyCode() == KeyEvent.VK_UP && player.getBowDirections().contains(Direction.UP)) player.removeBowDirection(Direction.UP);
+            else if (e.getKeyCode() == KeyEvent.VK_DOWN && player.getBowDirections().contains(Direction.DOWN)) player.removeBowDirection(Direction.DOWN);
+            else if (e.getKeyCode() == KeyEvent.VK_LEFT && player.getBowDirections().contains(Direction.LEFT)) player.removeBowDirection(Direction.LEFT);
+            else if (e.getKeyCode() == KeyEvent.VK_RIGHT && player.getBowDirections().contains(Direction.RIGHT)) player.removeBowDirection(Direction.RIGHT);
         }
     }
     
@@ -335,11 +362,14 @@ class Environment extends environment.Environment {
                 else graphics.drawImage(im.getImage(PImageManager.HALF_HEART_RIGHT), 7 + ((i % (HEARTS_PER_ROW * 2) / 2) * 10), 2 + ((i / (HEARTS_PER_ROW * 2)) * 9), 6, 10, null);
             }
             graphics.drawImage(im.getImage(PImageManager.CONSUMABLE_BOMB_00), 5, 12 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9), 5, 7, null);
+            graphics.drawImage(im.getImage(PImageManager.CONSUMABLE_ARROW_00), 6, 20 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9), 3, 7, null);
             graphics.setFont(gamefont_7);
             graphics.setColor(new Color(0, 0, 0, 80));
             graphics.drawString("x" + player.getBombCount(), 12, 19 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
+            graphics.drawString("x" + player.getArrowCount(), 12, 27 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
             graphics.setColor(Color.WHITE);
             graphics.drawString("x" + player.getBombCount(), 11, 18 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
+            graphics.drawString("x" + player.getArrowCount(), 11, 26 + ((((player.getMaxHealth() / 2) - 1) / HEARTS_PER_ROW) * 9));
         }
         
         for (int i = 0; i < 7; i++) {

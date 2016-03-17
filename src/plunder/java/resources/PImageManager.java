@@ -26,6 +26,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String ITEM_SWORD = "ITEM_SWORD";
     public static final String ITEM_BOW = "ITEM_BOW";
     
+    public static final String ARROW_00 = "ARROW_00";
+    
     public static final String SAND_TILE = "SAND_TILE";
     public static final String BRICK_TILE = "BRICK_TILE";
     
@@ -61,6 +63,12 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String CONSUMABLE_HEART_00 = "CONSUMABLE_HEART_00";
     public static final String CONSUMABLE_HEART_01 = "CONSUMABLE_HEART_01";
     public static final String CONSUMABLE_HEART_02 = "CONSUMABLE_HEART_02";
+    
+    public static final String CONSUMABLE_ARROW_00 = "CONSUMABLE_ARROW_00";
+    public static final String CONSUMABLE_ARROW_01 = "CONSUMABLE_ARROW_01";
+    public static final String CONSUMABLE_ARROW_02 = "CONSUMABLE_ARROW_02";
+    public static final String CONSUMABLE_ARROW_03 = "CONSUMABLE_ARROW_03";
+    public static final String CONSUMABLE_ARROW_04 = "CONSUMABLE_ARROW_04";
     
     public static final String CONSUMABLE_BOMB_00 = "CONSUMABLE_BOMB_00";
     public static final String CONSUMABLE_BOMB_01 = "CONSUMABLE_BOMB_01";
@@ -115,7 +123,13 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String PLAYER_WALK_RIGHT_01 = "PLAYER_WALK_RIGHT_01";
     public static final String PLAYER_WALK_RIGHT_02 = "PLAYER_WALK_RIGHT_02";
     
+    public static final String PLAYER_BOW_DOWN_00 = "PLAYER_BOW_DOWN_00";
+    public static final String PLAYER_BOW_DOWN_01 = "PLAYER_BOW_DOWN_01";
+    public static final String PLAYER_BOW_DOWN_02 = "PLAYER_BOW_DOWN_02";
+    
     public static final String BAT_LIST = "BAT_LIST";
+    
+    public static final String CONSUMABLE_ARROW_LIST = "CONSUMABLE_ARROW_LIST";
     
     public static final String CONSUMABLE_HEART_LIST = "CONSUMABLE_HEART_LIST";
     public static final String CONSUMABLE_BOMB_LIST = "CONSUMABLE_BOMB_LIST";
@@ -123,6 +137,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String PRIMED_BOMB_LIST = "PRIMED_BOMB_LIST";
     
     public static final String EXPLOSION_LIST = "EXPLOSION_LIST";
+    
+    public static final String ARROW_LIST = "ARROW_LIST";
     
     public static final String PLAYER_IDLE_UP_LIST = "PLAYER_IDLE_UP_LIST";
     public static final String PLAYER_IDLE_DOWN_LIST = "PLAYER_IDLE_DOWN_LIST";
@@ -145,6 +161,9 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     
     private final ArrayList<String> CONSUMABLE_HEART;
     private final ArrayList<String> CONSUMABLE_BOMB;
+    private final ArrayList<String> CONSUMABLE_ARROW;
+    
+    private final ArrayList<String> ARROW;
     
     private final ArrayList<String> PLAYER_IDLE_UP;
     private final ArrayList<String> PLAYER_IDLE_DOWN;
@@ -179,10 +198,13 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         PLAYER_WALK_LEFT = new ArrayList<>();
         PLAYER_WALK_RIGHT = new ArrayList<>();
         
+        ARROW = new ArrayList<>();
+        
         BAT = new ArrayList();
         
         CONSUMABLE_HEART = new ArrayList<>();
         CONSUMABLE_BOMB = new ArrayList<>();
+        CONSUMABLE_ARROW = new ArrayList<>();
         
         PRIMED_BOMB = new ArrayList<>();
         
@@ -212,9 +234,25 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         EXPLOSION.add(EXPLOSION_07);
         EXPLOSION.add(EXPLOSION_08);
         
+        ARROW.add(ARROW_00);
+        
         CONSUMABLE_HEART.add(CONSUMABLE_HEART_00);
         CONSUMABLE_HEART.add(CONSUMABLE_HEART_01);
         CONSUMABLE_HEART.add(CONSUMABLE_HEART_02);
+        
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_00);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_01);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_02);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_03);
+        CONSUMABLE_ARROW.add(CONSUMABLE_ARROW_04);
         
         CONSUMABLE_BOMB.add(CONSUMABLE_BOMB_00);
         CONSUMABLE_BOMB.add(CONSUMABLE_BOMB_00);
@@ -270,6 +308,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         
         imageListMap.put(BAT_LIST, BAT);
         
+        imageListMap.put(ARROW_LIST, ARROW);
+        
         imageListMap.put(PRIMED_BOMB_LIST, PRIMED_BOMB);
         
         imageListMap.put(EXPLOSION_LIST, EXPLOSION);
@@ -291,9 +331,12 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         
         imageListMap.put(CONSUMABLE_HEART_LIST, CONSUMABLE_HEART);
         imageListMap.put(CONSUMABLE_BOMB_LIST, CONSUMABLE_BOMB);
+        imageListMap.put(CONSUMABLE_ARROW_LIST, CONSUMABLE_ARROW);
         
         imageMap.put(MISSING_TEXTURE, ResourceTools.loadImageFromResource("plunder/resources/images/utility/missing_texture.png"));
         imageMap.put(ENTITY_SHADOW, ResourceTools.loadImageFromResource("plunder/resources/images/utility/entity_shadow.png"));
+        
+        imageMap.put(ARROW_00, ResourceTools.loadImageFromResource("plunder/resources/images/entity/arrow.png"));
         
         imageMap.put(INVENTORY_SLOT, ResourceTools.loadImageFromResource("plunder/resources/images/utility/inventory_slot.png"));
         imageMap.put(ITEM_SWORD, ResourceTools.loadImageFromResource("plunder/resources/images/item/sword.png"));
@@ -360,6 +403,12 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         imageMap.put(CONSUMABLE_BOMB_06, consumables.getSubimage(30, 5, 5, 7));
         imageMap.put(CONSUMABLE_BOMB_07, consumables.getSubimage(35, 5, 5, 7));
         
+        imageMap.put(CONSUMABLE_ARROW_00, consumables.getSubimage(0, 12, 3, 8));
+        imageMap.put(CONSUMABLE_ARROW_01, consumables.getSubimage(3, 12, 3, 8));
+        imageMap.put(CONSUMABLE_ARROW_02, consumables.getSubimage(6, 12, 3, 8));
+        imageMap.put(CONSUMABLE_ARROW_03, consumables.getSubimage(9, 12, 3, 8));
+        imageMap.put(CONSUMABLE_ARROW_04, consumables.getSubimage(12, 12, 3, 8));
+        
         imageMap.put(BAT_00, bat.getSubimage(0, 0, 9, 8));
         imageMap.put(BAT_01, bat.getSubimage(9, 0, 9, 8));
         
@@ -388,6 +437,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         imageMap.put(PLAYER_WALK_RIGHT_00, playerSprites.getSubimage(48, 0, 16, 16));
         imageMap.put(PLAYER_WALK_RIGHT_01, playerSprites.getSubimage(48, 17, 16, 16));
         imageMap.put(PLAYER_WALK_RIGHT_02, playerSprites.getSubimage(48, 32, 16, 16));
+        
+        imageMap.put(PLAYER_BOW_DOWN_00, playerSprites.getSubimage(64, 0, 16, 16));
+        imageMap.put(PLAYER_BOW_DOWN_01, playerSprites.getSubimage(64, 16, 16, 16));
+        imageMap.put(PLAYER_BOW_DOWN_02, playerSprites.getSubimage(64, 32, 16, 16));
         
         imageMap.put(HEALTH_METER_7, healthMeter.getSubimage(0, 0, 9, 2));
         imageMap.put(HEALTH_METER_6, healthMeter.getSubimage(0, 2, 9, 2));

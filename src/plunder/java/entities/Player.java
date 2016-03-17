@@ -18,6 +18,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import static plunder.java.main.EntityManager.bombs;
+import static plunder.java.main.EntityManager.projectiles;
 import plunder.java.resources.AudioPlayerIntf;
 import timer.DurationTimer;
 
@@ -29,13 +30,14 @@ public class Player extends Entity {
     
     private static final int PLAYER_WIDTH = 16;
     private static final int PLAYER_HEIGHT = 16;
-    private int health, maxHealth, bombCount;
+    private int health, maxHealth, bombCount, arrowCount;
     
     private static final int WEIGHT = 4;
     private final DurationTimer invulTimer;
     private final DurationTimer healthTimer;
     private final DurationTimer healthMeterBlinkTimer;
     private final DurationTimer itemDisplayTimer;
+    private int bowCharge;
     
     private BufferedImage displayItemImage;
     
@@ -48,6 +50,7 @@ public class Player extends Entity {
     private final ScreenLimitProviderIntf screenLimiter;
     
     private final ArrayList<Direction> directions;
+    private final ArrayList<Direction> bowDirections;
     private Direction facingDebug;
     private Direction facing;
     private ActionState actionState;
@@ -73,6 +76,7 @@ public class Player extends Entity {
 
         super(ip.getImage(PImageManager.PLAYER_IDLE_DOWN_00), position, new Dimension(PLAYER_WIDTH, PLAYER_HEIGHT), WEIGHT, ip, ap, PImageManager.PLAYER_WALK_DOWN_LIST, ANIMATION_SPEED);
         this.directions = new ArrayList<>();
+        this.bowDirections = new ArrayList<>();
         maxHealth = 6;
         health = maxHealth;
         this.environmentPosition = new Point(position);
@@ -95,6 +99,8 @@ public class Player extends Entity {
     @Override
     public void timerTaskHandler() {
         
+        if (actionState == ActionState.BOW && bowDirections.isEmpty()) fireArrow();
+        
         if (displayItemImage != null && itemDisplayTimer.isComplete()) displayItemImage = null;
         
         if (health <= 0) {
@@ -106,11 +112,15 @@ public class Player extends Entity {
         if (maxHealth % 2 > 0) maxHealth++;
         if (health > maxHealth) health = maxHealth;
         
-        updateVelocity();
-        move();
-        
         updateActionState();
-        updateFacingDirection();
+        
+        if (actionState != ActionState.BOW) {
+            updateVelocity();
+            updateFacingDirection();
+        }
+        else setVelocity(0, 0);
+
+        move();
         
         if (actionStateDebug != actionState || facingDebug != facing) {
             updateAnimator();
@@ -123,6 +133,12 @@ public class Player extends Entity {
         setPosition(environmentPosition.x + displacementPosition.x, environmentPosition.y + displacementPosition.y);
         
         super.timerTaskHandler();
+        
+        if (actionState == ActionState.BOW) {
+            bowCharge++;
+            if (bowCharge > 40) bowCharge = 40;
+            updateBowImage();
+        }
     }
     
     private void updateVelocity() {
@@ -137,9 +153,20 @@ public class Player extends Entity {
     }
     
     private void updateActionState() {
-        if (!onGround()) actionState = ActionState.JUMPING;
+        if (!bowDirections.isEmpty()) actionState = ActionState.BOW;
+        else if (!onGround()) actionState = ActionState.JUMPING;
         else if (getVelocity().x != 0 || getVelocity().y != 0) actionState = ActionState.WALKING;
         else actionState = ActionState.IDLE;
+    }
+    
+    private void updateBowImage() {
+        switch (facing) {
+            case DOWN:
+                if (bowCharge < 20) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_00));
+                else if (bowCharge < 40) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_01));
+                else setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_02));
+                break;
+        }
     }
     
     private void updateAnimator() {
@@ -197,6 +224,25 @@ public class Player extends Entity {
                 }
             break;
         }
+    }
+    
+    private void fireArrow() {
+        arrowCount--;
+        switch (facing) {
+            case UP:
+                projectiles.add(new ProjectileArrow(new Point(getPosition().x, getPosition().y - 1), getZDisplacement() + 5, new Velocity(0, (int) (-.125 * bowCharge) - 1), .025 * bowCharge, 270, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                break;
+            case DOWN:
+                projectiles.add(new ProjectileArrow(new Point(getPosition().x, getPosition().y + 1), getZDisplacement() + 5, new Velocity(0, (int) (.125 * bowCharge) + 1), .025 * bowCharge, 90, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                break;
+            case LEFT:
+                projectiles.add(new ProjectileArrow(new Point(getPosition().x + 1, getPosition().y), getZDisplacement() + 5, new Velocity((int) (-.125 * bowCharge) - 1, 0), .025 * bowCharge, 180, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                break;
+            case RIGHT:
+                projectiles.add(new ProjectileArrow(new Point(getPosition().x - 1, getPosition().y - 1), getZDisplacement() + 5, new Velocity((int) (.125 * bowCharge) + 1, 0), .025 * bowCharge, 0, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                break;
+        }
+        bowCharge = 0;
     }
     
     @Override
@@ -260,6 +306,10 @@ public class Player extends Entity {
         return directions;
     }
     
+    public ArrayList<Direction> getBowDirections() {
+        return bowDirections;
+    }
+    
     public ActionState getActionState() {
         return actionState;
     }
@@ -270,6 +320,17 @@ public class Player extends Entity {
     
     public void removeDirection(Direction direction) {
         directions.remove(direction);
+    }
+    
+    public void addBowDirection(Direction direction) {
+        if (arrowCount > 0) {
+            facing = direction;
+            bowDirections.add(direction);
+        }
+    }
+    
+    public void removeBowDirection(Direction direction) {
+        bowDirections.remove(direction);
     }
     
     public Point getEnvironmentPosition() {
@@ -318,6 +379,10 @@ public class Player extends Entity {
         bombCount += bombs;
     }
     
+    public void addArrows(int arrows) {
+        arrowCount += arrows;
+    }
+    
     public void useBomb() {
         if (bombCount > 0) {
             Velocity bombVelocity = new Velocity(0, 0);
@@ -342,5 +407,9 @@ public class Player extends Entity {
     
     public int getBombCount() {
         return bombCount;
+    }
+    
+    public int getArrowCount() {
+        return arrowCount;
     }
 }

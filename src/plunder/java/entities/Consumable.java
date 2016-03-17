@@ -19,7 +19,7 @@ import plunder.java.resources.ImageProviderIntf;
  */
 public class Consumable extends Entity{
 
-    public Consumable(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageNameList, int animationSpeed) {
+    public Consumable(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, double weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageNameList, int animationSpeed) {
         super(image, position, size, weight, ip, ap, imageNameList, animationSpeed);
         setZDisplacement(zDisplacement);
         setVelocity(velocity);

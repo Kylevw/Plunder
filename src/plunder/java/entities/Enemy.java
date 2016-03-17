@@ -5,12 +5,15 @@
  */
 package plunder.java.entities;
 
+import static environment.Utility.random;
+import environment.Velocity;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import path.TrigonometryCalculator;
+import static plunder.java.main.EntityManager.consumables;
 import static plunder.java.main.EntityManager.player;
 import plunder.java.main.HealthMeter;
 import plunder.java.resources.AudioPlayerIntf;
@@ -31,7 +34,7 @@ public class Enemy extends Entity {
     private final int maxHealth, strength, defense;
     private int health;
 
-    public Enemy(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed, int maxHealth, int strength, int defense, int sightDistance, int attackDistance, int attackDelay) {
+    public Enemy(BufferedImage image, Point position, Dimension size, double weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed, int maxHealth, int strength, int defense, int sightDistance, int attackDistance, int attackDelay) {
         super(image, position, size, weight, ip, ap, imageListName, animationSpeed);
         this.maxHealth = maxHealth;
         this.health = maxHealth;
@@ -46,7 +49,10 @@ public class Enemy extends Entity {
     @Override
     public void timerTaskHandler() {
         
-        if (health <= 0) setDespawn(true);
+        if (health <= 0) {
+            setDespawn(true);
+            spawnReward();
+        }
         
         healthMeter.setHealth(health);
         healthMeter.setPosition(new Point(getPosition().x - 4, getPosition().y - getSize().height - getZDisplacement() - 3));
@@ -83,6 +89,13 @@ public class Enemy extends Entity {
     
     public void attackAI() {
         
+    }
+    
+    private void spawnReward() {
+        int random = random(100);
+        if (random < 10) consumables.add(new Bomb(getPosition(), getZDisplacement(), new Velocity(random(3) - 1, random(3) - 1), 3, getImageProvider(), getAudioPlayer()));
+        else if (random < 20) consumables.add(new Arrow(getPosition(), getZDisplacement(), new Velocity(random(3) - 1, random(3) - 1), 3, getImageProvider(), getAudioPlayer()));
+        else if (random < 50) consumables.add(new Heart(getPosition(), getZDisplacement(), new Velocity(random(3) - 1, random(3) - 1), 1.5, getImageProvider(), getAudioPlayer()));
     }
     
     @Override

@@ -24,7 +24,7 @@ public class Bomb extends Consumable {
 //        drawObjectBoundary(true);
     }
     
-    private static final int WEIGHT = 3;
+    private static final double WEIGHT = 3;
     private static final int ANIMATION_SPEED = 80;
     private static final int WIDTH = 5;
     private static final int HEIGHT = 7;

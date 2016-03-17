@@ -27,7 +27,7 @@ public class Heart extends Consumable {
     private int yChangeTimer = 2;
     private boolean fallAnimation;
     
-    private static final int WEIGHT = 1;
+    private static final double WEIGHT = 1;
     private static final int ANIMATION_SPEED = 160;
     private static final int WIDTH = 5;
     private static final int HEIGHT = 5;

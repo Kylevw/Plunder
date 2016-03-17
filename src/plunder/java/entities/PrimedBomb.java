@@ -8,7 +8,6 @@ package plunder.java.entities;
 import environment.Velocity;
 import java.awt.Dimension;
 import java.awt.Point;
-import static plunder.java.main.EntityManager.explosions;
 import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
@@ -25,7 +24,7 @@ public class PrimedBomb extends Entity{
     private static final int ANIMATION_SPEED = 80;
     private static final int WIDTH = 7;
     private static final int HEIGHT = 8;
-    private static final int WEIGHT = 3;
+    private static final double WEIGHT = 3;
     private static final int FUSE_DELAY = 1000;
 
     public PrimedBomb(Point position, int zDisplacement, Velocity velocity, int zVelocity, ImageProviderIntf ip, AudioPlayerIntf ap) {

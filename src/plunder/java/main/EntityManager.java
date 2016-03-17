@@ -12,6 +12,7 @@ import plunder.java.entities.Entity;
 import plunder.java.entities.Explosion;
 import plunder.java.entities.Player;
 import plunder.java.entities.PrimedBomb;
+import plunder.java.entities.Projectile;
 
 /**
  *
@@ -26,6 +27,7 @@ public class EntityManager {
     public static ArrayList<Consumable> consumables = new ArrayList<>();
     public static ArrayList<PrimedBomb> bombs = new ArrayList<>();
     public static ArrayList<Explosion> explosions = new ArrayList<>();
+    public static ArrayList<Projectile> projectiles = new ArrayList<>();
     
     public static ArrayList<Enemy> getEnemies() {
         return enemies;
@@ -45,6 +47,10 @@ public class EntityManager {
     
     public static ArrayList<Explosion> getExplosions() {
         return explosions;
+    }
+    
+    public static ArrayList<Projectile> getProjectiles() {
+        return projectiles;
     }
     
 }

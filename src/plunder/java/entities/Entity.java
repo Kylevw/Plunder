@@ -32,7 +32,7 @@ public class Entity extends Actor{
     }
     
     private boolean onGround;
-    private int weight;
+    private double weight;
     
     private boolean explode;
     private int explosionSize;
@@ -49,7 +49,7 @@ public class Entity extends Actor{
     private final ImageProviderIntf ip;
     private final AudioPlayerIntf ap;
     
-    public Entity(BufferedImage image, Point position, Dimension size, int weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed) {
+    public Entity(BufferedImage image, Point position, Dimension size, double weight, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed) {
         super(image, position, new Velocity(0, 0));
         this.ap = ap;
         this.size = size;
@@ -88,8 +88,11 @@ public class Entity extends Actor{
     
     @Override
     public Rectangle getObjectBoundary() {
-        return new Rectangle(getObjectGroundBoundary().x, getObjectGroundBoundary().y - zDisplacement,
-        getObjectGroundBoundary().width, getObjectGroundBoundary().height);
+        Rectangle groundBoundary = getObjectGroundBoundary();
+        groundBoundary.translate(0, -zDisplacement);
+        return groundBoundary;
+//        return new Rectangle(groundBoundary.x, groundBoundary.y - zDisplacement,
+//        groundBoundary.width, groundBoundary.height);
     }
     
     public Rectangle getObjectGroundBoundary() {

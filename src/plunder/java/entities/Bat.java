@@ -41,7 +41,7 @@ public class Bat extends Enemy {
     public static final int ATTACK_DISTANCE = 20;
     public static final int ATTACK_DELAY = 900;
     
-    private static final int DEFAULT_Z_DISPLACEMENT = 11;
+    private static final int DEFAULT_Z_DISPLACEMENT = 10;
     
     private static final int ANIMATION_SPEED = 80;
     public static final Dimension SIZE = new Dimension(9, 8);
@@ -94,7 +94,7 @@ public class Bat extends Enemy {
     
     @Override
     public void attackAI() {
-        accelerateZVelocity(0.11);
+        accelerateZVelocity(0.12);
     }
     
     @Override
