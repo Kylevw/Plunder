@@ -54,16 +54,12 @@ public class Enemy extends Entity {
             spawnReward();
         }
         
-        healthMeter.setHealth(health);
-        healthMeter.setPosition(new Point(getPosition().x - 4, getPosition().y - getSize().height - getZDisplacement() - 3));
-        
         if (!attackTimer.isComplete()) attackAI();
         else if (player != null) {
-            int playerDistance = (int) TrigonometryCalculator.getHypotenuse(getPosition().x, getPosition().y, player.getPosition().x, player.getPosition().y);
-            if (playerDistance <= getAttackDistance() && attackTimer.isComplete()) {
+            if (getPlayerDistance() <= getAttackDistance() && attackTimer.isComplete()) {
                 attackTimer.start();
                 startAttackAI();
-            } else if (playerDistance <= getSightDistance() && attackTimer.isComplete()) targetAI();
+            } else if (getPlayerDistance() <= getSightDistance() && attackTimer.isComplete()) targetAI();
             else if (attackTimer.isComplete()) standardAI();
         } else standardAI();
         
@@ -73,6 +69,15 @@ public class Enemy extends Entity {
         
         super.timerTaskHandler();
         
+        healthMeter.setHealth(health);
+        healthMeter.setPosition(new Point(getPosition().x - 4, getPosition().y - getSize().height - getZDisplacement() - 3));
+        
+        
+    }
+    
+    public double getPlayerDistance() {
+       if (player != null) return TrigonometryCalculator.getHypotenuse(getPosition().x, getPosition().y, player.getPosition().x, player.getPosition().y);
+       else return Integer.MAX_VALUE;
     }
     
     public void standardAI() {

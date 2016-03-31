@@ -5,6 +5,7 @@
  */
 package plunder.java.entities;
 
+import environment.Velocity;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -13,6 +14,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import path.TrigonometryCalculator;
 import plunder.java.main.EntityManager;
 import static plunder.java.main.EntityManager.player;
 import plunder.java.resources.AudioPlayerIntf;
@@ -24,38 +26,46 @@ import plunder.java.resources.ImageProviderIntf;
  */
 public class Projectile extends Entity{
 
-    private final int rotation;
+    private double rotation;
     private final boolean friendly;
     private final int damage;
     
-    public Projectile(BufferedImage image, Point position, Dimension size, double weight, int rotation, boolean friendly, int damage, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed) {
+    public Projectile(BufferedImage image, Point position, int zDisplacement, Velocity velocity, double zVelocity, Dimension size, double weight, boolean friendly, int damage, ImageProviderIntf ip, AudioPlayerIntf ap, String imageListName, int animationSpeed) {
         super(image, position, size, weight, ip, ap, imageListName, animationSpeed);
-        this.rotation = rotation;
+        setVelocity(velocity);
+        setZDisplacement(zDisplacement);
+        setZVelocity(zVelocity);
         this.friendly = friendly;
         this.damage = damage;
     }
     
+    public boolean isFriendly() {
+        return friendly;
+    }
+    
     @Override
     public void draw(Graphics2D graphics) {
-        graphics.setColor(Color.RED);
-        graphics.drawPolygon(getProjectileGroundBoundary());
+        if (drawBoundary()) {
+            graphics.setColor(Color.RED);
+            graphics.drawPolygon(getProjectileGroundBoundary());
+        }
         
         AffineTransform at = graphics.getTransform();
-        
         graphics.rotate(Math.toRadians(rotation), getPosition().x, getPosition().y - getZDisplacement() - 2);
-        
         graphics.drawImage(getImage(), getPosition().x - (getSize().width / 2), getPosition().y - (getSize().height) - getZDisplacement(), getSize().width, getSize().height, null);
 
         graphics.setTransform(at);
-//        graphics.drawPolygon(getProjectileGroundBoundary());
-//        graphics.drawPolygon(getProjectileBoundary());
         
-        graphics.setColor(Color.BLUE);
-        graphics.drawPolygon(getProjectileBoundary());
+        if (drawBoundary()) {
+            graphics.setColor(Color.BLUE);
+            graphics.drawPolygon(getProjectileBoundary());
+        }
     }
     
     @Override
     public void timerTaskHandler() {
+        
+        rotation = TrigonometryCalculator.getVelocityAngle(getVelocity());
         
         if (getZDisplacement() <= 0) setDespawn(true);
         else if (friendly) {
@@ -63,6 +73,7 @@ public class Projectile extends Entity{
                     getProjectileGroundBoundary().intersects(enemy.getObjectGroundBoundary()) && 
                     getProjectileBoundary().intersects(enemy.getObjectBoundary()))).forEach((enemy) -> {
                         enemy.damage(damage);
+                        enemy.accelerateKnockbackVelocity(getVelocity());
                         setDespawn(true);
             });
         } else if (getProjectileGroundBoundary().intersects(player.getObjectGroundBoundary()) && 

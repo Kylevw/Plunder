@@ -61,6 +61,8 @@ public class Player extends Entity {
     
     private static final int ANIMATION_SPEED = 160;
     
+    public static final int BOW_CHARGE_TIME = 30;
+    
     
     /**
      * Constructor, returns an instance of the Player class
@@ -99,7 +101,11 @@ public class Player extends Entity {
     @Override
     public void timerTaskHandler() {
         
-        if (actionState == ActionState.BOW && bowDirections.isEmpty()) fireArrow();
+        
+        if (actionState == ActionState.BOW) {
+            if (!bowDirections.isEmpty() && !bowDirections.contains(facing)) facing = bowDirections.get(bowDirections.size() - 1);
+            if (bowDirections.isEmpty()) fireArrow();
+        }
         
         if (displayItemImage != null && itemDisplayTimer.isComplete()) displayItemImage = null;
         
@@ -161,10 +167,25 @@ public class Player extends Entity {
     
     private void updateBowImage() {
         switch (facing) {
+            case UP:
+                if (bowCharge < BOW_CHARGE_TIME / 2) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_UP_00));
+                else if (bowCharge < BOW_CHARGE_TIME) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_UP_01));
+                else setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_UP_02));
+                break;
             case DOWN:
-                if (bowCharge < 20) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_00));
-                else if (bowCharge < 40) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_01));
+                if (bowCharge < BOW_CHARGE_TIME / 2) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_00));
+                else if (bowCharge < BOW_CHARGE_TIME) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_01));
                 else setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_DOWN_02));
+                break;
+            case LEFT:
+                if (bowCharge < BOW_CHARGE_TIME / 2) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_LEFT_00));
+                else if (bowCharge < BOW_CHARGE_TIME) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_LEFT_01));
+                else setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_LEFT_02));
+                break;
+            case RIGHT:
+                if (bowCharge < BOW_CHARGE_TIME / 2) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_RIGHT_00));
+                else if (bowCharge < BOW_CHARGE_TIME) setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_RIGHT_01));
+                else setImage(getImageProvider().getImage(PImageManager.PLAYER_BOW_RIGHT_02));
                 break;
         }
     }
@@ -230,16 +251,16 @@ public class Player extends Entity {
         arrowCount--;
         switch (facing) {
             case UP:
-                projectiles.add(new ProjectileArrow(new Point(getPosition().x, getPosition().y - 1), getZDisplacement() + 5, new Velocity(0, (int) (-.125 * bowCharge) - 1), .025 * bowCharge, 270, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x + 2, getCenterOfMass().y + 5), getZDisplacement() + 3, new Velocity(0, (int) (-5 * bowCharge / BOW_CHARGE_TIME) - 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case DOWN:
-                projectiles.add(new ProjectileArrow(new Point(getPosition().x, getPosition().y + 1), getZDisplacement() + 5, new Velocity(0, (int) (.125 * bowCharge) + 1), .025 * bowCharge, 90, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x - 2, getCenterOfMass().y + 5), getZDisplacement() + 3, new Velocity(0, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case LEFT:
-                projectiles.add(new ProjectileArrow(new Point(getPosition().x + 1, getPosition().y), getZDisplacement() + 5, new Velocity((int) (-.125 * bowCharge) - 1, 0), .025 * bowCharge, 180, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 3, new Velocity((int) (-5 * bowCharge / BOW_CHARGE_TIME) - 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case RIGHT:
-                projectiles.add(new ProjectileArrow(new Point(getPosition().x - 1, getPosition().y - 1), getZDisplacement() + 5, new Velocity((int) (.125 * bowCharge) + 1, 0), .025 * bowCharge, 0, true, (int) (.125 * bowCharge) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 3, new Velocity((int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
         }
         bowCharge = 0;
@@ -384,7 +405,7 @@ public class Player extends Entity {
     }
     
     public void useBomb() {
-        if (bombCount > 0) {
+        if (bombCount > 0 && bowDirections.isEmpty()) {
             Velocity bombVelocity = new Velocity(0, 0);
             switch (facing) {
                 case UP:

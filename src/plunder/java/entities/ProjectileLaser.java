@@ -13,30 +13,38 @@ import static plunder.java.main.EntityManager.consumables;
 import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
+import timer.DurationTimer;
 
 /**
  *
  * @author Kyle
  */
-public class ProjectileArrow extends Projectile{
+public class ProjectileLaser extends Projectile{
     
     {
 //        drawObjectBoundary(true);
     }
     
+    private final DurationTimer despawnTimer;
+    
     public static final int WIDTH = 10;
     public static final int HEIGHT = 3;
-    public static final double WEIGHT = .2;
+    public static final double WEIGHT = 0;
+    public static final int DESPAWN_TIME = 900;
     public static final int ANIMATION_SPEED = Integer.MAX_VALUE;
     
-    public ProjectileArrow(Point position, int zDisplacement, Velocity velocity, double zVelocity, boolean friendly, int damage, ImageProviderIntf ip, AudioPlayerIntf ap) {
-        super(ip.getImage(PImageManager.ARROW_00), position, zDisplacement, velocity, zVelocity, new Dimension(WIDTH, HEIGHT), WEIGHT, friendly, damage, ip, ap, PImageManager.ARROW_LIST, ANIMATION_SPEED);
+    public ProjectileLaser(Point position, int zDisplacement, Velocity velocity, boolean friendly, int damage, ImageProviderIntf ip, AudioPlayerIntf ap) {
+        super(ip.getImage(PImageManager.LASER_BLUE_00), position, zDisplacement, velocity, 0, new Dimension(WIDTH, HEIGHT), WEIGHT, friendly, damage, ip, ap, PImageManager.LASER_BLUE_LIST, ANIMATION_SPEED);
+        despawnTimer = new DurationTimer(DESPAWN_TIME);
     }
     
     
     
     @Override
     public void timerTaskHandler() {
+        
+        if (despawnTimer.isComplete()) setDespawn(true);
+        
         move();
         applyZVelocity();
         super.timerTaskHandler();

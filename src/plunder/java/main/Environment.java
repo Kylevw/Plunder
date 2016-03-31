@@ -5,7 +5,6 @@
  */
 package plunder.java.main;
 
-import static environment.Utility.random;
 import environment.Velocity;
 import plunder.java.resources.GameState;
 import plunder.java.resources.PImageManager;
@@ -17,7 +16,6 @@ import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import plunder.java.entities.Arrow;
-import plunder.java.entities.ProjectileArrow;
 import plunder.java.entities.Bat;
 import plunder.java.entities.Bomb;
 import plunder.java.entities.Consumable;
@@ -38,6 +35,7 @@ import plunder.java.entities.Explosion;
 import plunder.java.entities.Heart;
 import plunder.java.entities.PrimedBomb;
 import plunder.java.entities.Projectile;
+import plunder.java.entities.SamsaraEye;
 import static plunder.java.main.EntityManager.bombs;
 import static plunder.java.main.EntityManager.consumables;
 import static plunder.java.main.EntityManager.enemies;
@@ -110,9 +108,7 @@ class Environment extends environment.Environment {
             gamefont_7 = gamefont.deriveFont((float)7.0);
             gamefont_14 = gamefont.deriveFont((float)14.0);
 
-        } catch (FontFormatException ex) {
-            Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (FontFormatException | IOException ex) {
             Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -197,32 +193,26 @@ class Environment extends environment.Environment {
             
             else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
-            else if (e.getKeyCode() == KeyEvent.VK_E && player != null) {
-                consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 1.5, im, am));
-            }
-            
-            else if (e.getKeyCode() == KeyEvent.VK_R && player != null) {
-                consumables.add(new Arrow(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im, am));
-            }
-            
-            else if (e.getKeyCode() == KeyEvent.VK_Q && player != null) {
-                consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 0, new Velocity(random(3) - 1, random(3) - 1), 3, im, am));
-            }
             
             else if (e.getKeyCode() == KeyEvent.VK_F && player != null) {
                 consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
             }
-            
             else if (e.getKeyCode() == KeyEvent.VK_G && player != null) {
                 consumables.add(new Bomb(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
             }
-            
-            else if (e.getKeyCode() == KeyEvent.VK_J && player != null) {
+            else if (e.getKeyCode() == KeyEvent.VK_H && player != null) {
+                consumables.add(new Arrow(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
+            }
+            else if (e.getKeyCode() == KeyEvent.VK_PERIOD && player != null) {
                 player.useBomb();
             }
 
             else if (e.getKeyCode() == KeyEvent.VK_Z && player != null) {
                 enemies.add(new Bat(new Point(player.getPosition().x, player.getPosition().y - 80), im, am));
+            }
+            
+            else if (e.getKeyCode() == KeyEvent.VK_X && player != null) {
+                enemies.add(new SamsaraEye(new Point(player.getPosition().x, player.getPosition().y - 80), im, am));
             }
             
             else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) paused = !paused;

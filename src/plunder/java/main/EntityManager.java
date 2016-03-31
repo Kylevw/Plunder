@@ -34,6 +34,7 @@ public class EntityManager {
     }
     
     public static ArrayList<Entity> getEntities() {
+        if (player == null) entities.remove(player);
         return entities;
     }
     

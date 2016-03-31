@@ -6,6 +6,7 @@
 package plunder.java.entities;
 
 import environment.Actor;
+import environment.Physics;
 import environment.Velocity;
 import images.Animator;
 import plunder.java.resources.PImageManager;
@@ -45,6 +46,8 @@ public class Entity extends Actor{
     private boolean drawBoundary;
     private int zDisplacement;
     private double zVelocity;
+    private double xKnockback, yKnockback;
+    private boolean applyGravity;
     
     private final ImageProviderIntf ip;
     private final AudioPlayerIntf ap;
@@ -58,6 +61,20 @@ public class Entity extends Actor{
         if (this.weight < 0) this.weight = 0;
         PImageManager im = new PImageManager();
         this.animator = new Animator(im, ip.getImageList(imageListName), animationSpeed);
+        applyGravity = true;
+    }
+    
+    public void accelerateKnockbackVelocity(int x, int y) {
+        xKnockback += x;
+        yKnockback += y;
+    }
+    
+    public void applyGravity(boolean applyGravity) {
+        this.applyGravity = applyGravity;
+    }
+    
+    public void accelerateKnockbackVelocity(Velocity velocity) {
+        accelerateKnockbackVelocity(velocity.x, velocity.y);
     }
     
     public Dimension getSize() {
@@ -66,6 +83,11 @@ public class Entity extends Actor{
     
     public void timerTaskHandler() {
         updateImage();
+        
+        setPosition(getPosition().x + (int) xKnockback, getPosition().y + (int) yKnockback);
+        if (xKnockback != 0) xKnockback -= weight * xKnockback / Math.abs(xKnockback) / 8;
+        if (yKnockback != 0) yKnockback -= weight * yKnockback / Math.abs(yKnockback) / 8;
+        
         if (explode) {
             explosions.add(new Explosion(getPosition(), explosionSize, ap));
             setDespawn(true);
@@ -93,6 +115,11 @@ public class Entity extends Actor{
         return groundBoundary;
 //        return new Rectangle(groundBoundary.x, groundBoundary.y - zDisplacement,
 //        groundBoundary.width, groundBoundary.height);
+    }
+    
+    @Override
+    public Point getCenterOfMass() {
+        return Physics.getCenterOfMass(this.getObjectGroundBoundary());
     }
     
     public Rectangle getObjectGroundBoundary() {
@@ -139,10 +166,12 @@ public class Entity extends Actor{
     public void applyZVelocity() {
         zDisplacement += zVelocity;
         
-        if (zDisplacement <= 0) {
-            zDisplacement = 0;
-            zVelocity = 0;
-        } else accelerateZVelocity(-.125 * weight);
+        if (applyGravity) {
+            if (zDisplacement <= 0) {
+                zDisplacement = 0;
+                zVelocity = 0;
+            } else accelerateZVelocity(-.125 * weight);
+        }
     }
     
     public Rectangle getShadowRectangle() {

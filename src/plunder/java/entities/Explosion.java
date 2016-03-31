@@ -6,7 +6,6 @@
 package plunder.java.entities;
 
 import images.Animator;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -70,6 +69,7 @@ public class Explosion {
                     double enemyDistance = TrigonometryCalculator.getSideLength(enemy.getZDisplacement(), TrigonometryCalculator.getHypotenuse(position.x, position.y, enemy.getPosition().x, enemy.getPosition().y));
                     if (enemyDistance <= size * RADIUS / 2) {
                         enemy.damage((int) ((size * RADIUS - enemyDistance - 1) * MAX_DAMAGE / RADIUS) + 1);
+                        enemy.accelerateKnockbackVelocity(TrigonometryCalculator.calculateVelocity(position, enemy.getPosition(), ((RADIUS * size) - enemyDistance) * 5 / RADIUS));
                     }
                 });
             }

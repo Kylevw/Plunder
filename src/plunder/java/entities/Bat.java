@@ -40,16 +40,18 @@ public class Bat extends Enemy {
     public static final int SIGHT_DISTANCE = 100;
     public static final int ATTACK_DISTANCE = 20;
     public static final int ATTACK_DELAY = 900;
+    public static final int WEIGHT = 2;
     
-    private static final int DEFAULT_Z_DISPLACEMENT = 10;
+    private static final int DEFAULT_Z_DISPLACEMENT = 7;
     
     private static final int ANIMATION_SPEED = 80;
     public static final Dimension SIZE = new Dimension(9, 8);
     
     public Bat(Point position, ImageProviderIntf ip, AudioPlayerIntf ap) {
-        super(ip.getImage(PImageManager.BAT_00), position, SIZE, 0, ip, ap, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
+        super(ip.getImage(PImageManager.BAT_00), position, SIZE, WEIGHT, ip, ap, PImageManager.BAT_LIST, ANIMATION_SPEED, MAX_HEALTH, STRENGTH, DEFENSE, SIGHT_DISTANCE, ATTACK_DISTANCE, ATTACK_DELAY);
         moveTimer = new DurationTimer(IDLE_MOVEMENT_DELAY);
         setZDisplacement(DEFAULT_Z_DISPLACEMENT);
+        applyGravity(false);
     }
     
     @Override
@@ -94,7 +96,7 @@ public class Bat extends Enemy {
     
     @Override
     public void attackAI() {
-        accelerateZVelocity(0.12);
+        accelerateZVelocity(0.13);
     }
     
     @Override
