@@ -65,25 +65,36 @@ public class Projectile extends Entity{
     @Override
     public void timerTaskHandler() {
         
-        rotation = TrigonometryCalculator.getVelocityAngle(getVelocity());
+        setRotation(TrigonometryCalculator.getVelocityAngle(getVelocity()));
         
         if (getZDisplacement() <= 0) setDespawn(true);
         else if (friendly) {
             EntityManager.getEnemies().stream().filter((enemy) -> (!despawn() &&
-                    getProjectileGroundBoundary().intersects(enemy.getObjectGroundBoundary()) && 
-                    getProjectileBoundary().intersects(enemy.getObjectBoundary()))).forEach((enemy) -> {
-                        enemy.damage(damage);
+                    intersectsHitbox(enemy))).forEach((enemy) -> {
                         enemy.accelerateKnockbackVelocity(getVelocity());
+                        enemy.damage(damage);
                         setDespawn(true);
             });
-        } else if (getProjectileGroundBoundary().intersects(player.getObjectGroundBoundary()) && 
-                    getProjectileBoundary().intersects(player.getObjectBoundary())) {
+        } else if (intersectsHitbox(player)) {
             player.damage(damage);
             setDespawn(true);
         }
         
         super.timerTaskHandler();
         
+    }
+    
+    public boolean intersectsHitbox(Entity entity) {
+        return getProjectileGroundBoundary().intersects(entity.getObjectGroundBoundary()) && 
+                getProjectileBoundary().intersects(entity.getObjectBoundary());
+    }
+    
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
+    }
+    
+    public int getDamage() {
+        return damage;
     }
     
     public Polygon getProjectileBoundary() {

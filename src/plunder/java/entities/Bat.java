@@ -34,7 +34,7 @@ public class Bat extends Enemy {
     private static final int IDLE_MOVEMENT_DELAY = 40;
     public static final int ATTACK_MOVEMENT_DELAY = 20;
     
-    private static final int MAX_HEALTH = 6;
+    private static final int MAX_HEALTH = 7;
     private static final int STRENGTH = 1;
     public static final int DEFENSE = 0;
     public static final int SIGHT_DISTANCE = 100;

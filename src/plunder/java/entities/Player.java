@@ -28,6 +28,8 @@ import timer.DurationTimer;
  */
 public class Player extends Entity {
     
+    private boolean swordSwingDebug;
+    
     private static final int PLAYER_WIDTH = 16;
     private static final int PLAYER_HEIGHT = 16;
     private int health, maxHealth, bombCount, arrowCount;
@@ -37,6 +39,7 @@ public class Player extends Entity {
     private final DurationTimer healthTimer;
     private final DurationTimer healthMeterBlinkTimer;
     private final DurationTimer itemDisplayTimer;
+    private final DurationTimer swordAttackTimer;
     private int bowCharge;
     
     private BufferedImage displayItemImage;
@@ -84,12 +87,13 @@ public class Player extends Entity {
         this.environmentPosition = new Point(position);
         this.displacementPosition = new Point(0, 0);
         this.screenLimiter = screenLimiter;
-        screenLimiter.setMaxY(screenLimiter.getMaxY() + (getSize().height / 2));
+        screenLimiter.setMaxY(screenLimiter.getMaxY());
         
         invulTimer = new DurationTimer(1200);
         healthTimer = new DurationTimer(1600);
         healthMeterBlinkTimer = new DurationTimer(200);
         itemDisplayTimer = new DurationTimer(600);
+        swordAttackTimer = new DurationTimer(240);
     }
     
     @Override
@@ -101,10 +105,19 @@ public class Player extends Entity {
     @Override
     public void timerTaskHandler() {
         
+        correctDisplacementPosition();
+        
+//        System.out.println("Position: [" + getPosition().x + "," + getPosition().y + "]");
+//        System.out.println("Environment Position: [" + environmentPosition.x + "," + environmentPosition.y + "]");
+//        System.out.println("Displacement Position: [" + displacementPosition.x + "," + displacementPosition.y + "]");
         
         if (actionState == ActionState.BOW) {
             if (!bowDirections.isEmpty() && !bowDirections.contains(facing)) facing = bowDirections.get(bowDirections.size() - 1);
             if (bowDirections.isEmpty()) fireArrow();
+        }
+        
+        if (actionState == ActionState.SWORD) {
+            bowDirections.clear();
         }
         
         if (displayItemImage != null && itemDisplayTimer.isComplete()) displayItemImage = null;
@@ -120,7 +133,7 @@ public class Player extends Entity {
         
         updateActionState();
         
-        if (actionState != ActionState.BOW) {
+        if (actionState != ActionState.BOW && actionState != ActionState.SWORD) {
             updateVelocity();
             updateFacingDirection();
         }
@@ -147,6 +160,38 @@ public class Player extends Entity {
         }
     }
     
+    private void correctDisplacementPosition() {
+        if (environmentPosition.x < screenLimiter.getMinX()) {
+            int xDifference = environmentPosition.x - screenLimiter.getMinX();
+            environmentPosition.x -= xDifference;
+            displacementPosition.x += xDifference;
+        }
+        else if (environmentPosition.x > screenLimiter.getMaxX()) {
+            int xDifference = environmentPosition.x - screenLimiter.getMaxX();
+            environmentPosition.x -= xDifference;
+            displacementPosition.x += xDifference;
+        }
+        else if (displacementPosition.x != 0 && getPosition().x >= screenLimiter.getMinY() && getPosition().x <= screenLimiter.getMaxY()) {
+            environmentPosition.x += displacementPosition.x;
+            displacementPosition.x = 0;
+        }
+        
+        if (environmentPosition.y < screenLimiter.getMinX()) {
+            int yDifference = environmentPosition.y - screenLimiter.getMinY();
+            environmentPosition.y -= yDifference;
+            displacementPosition.y += yDifference;
+        }
+        else if (environmentPosition.y > screenLimiter.getMaxX()) {
+            int yDifference = environmentPosition.y - screenLimiter.getMaxY();
+            environmentPosition.y -= yDifference;
+            displacementPosition.y += yDifference;
+        }
+        else if (displacementPosition.y != 0 && getPosition().y >= screenLimiter.getMinY() && getPosition().y <= screenLimiter.getMaxY()) {
+            environmentPosition.y += displacementPosition.y;
+            displacementPosition.y = 0;
+        }
+    }
+    
     private void updateVelocity() {
         
         // If the player's Directions list contains a certain direction, apply that direction to the velocity
@@ -159,7 +204,8 @@ public class Player extends Entity {
     }
     
     private void updateActionState() {
-        if (!bowDirections.isEmpty()) actionState = ActionState.BOW;
+        if (!swordAttackTimer.isComplete()) actionState = ActionState.SWORD;
+        else if (!bowDirections.isEmpty()) actionState = ActionState.BOW;
         else if (!onGround()) actionState = ActionState.JUMPING;
         else if (getVelocity().x != 0 || getVelocity().y != 0) actionState = ActionState.WALKING;
         else actionState = ActionState.IDLE;
@@ -251,19 +297,44 @@ public class Player extends Entity {
         arrowCount--;
         switch (facing) {
             case UP:
-                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x + 2, getCenterOfMass().y + 5), getZDisplacement() + 3, new Velocity(0, (int) (-5 * bowCharge / BOW_CHARGE_TIME) - 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x + 2, getCenterOfMass().y + 5), getZDisplacement() + 2, new Velocity(0, (int) (-6 * bowCharge / BOW_CHARGE_TIME) - 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case DOWN:
-                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x - 2, getCenterOfMass().y + 5), getZDisplacement() + 3, new Velocity(0, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x - 2, getCenterOfMass().y + 5), getZDisplacement() + 2, new Velocity(0, (int) (6 * bowCharge / BOW_CHARGE_TIME) + 1), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case LEFT:
-                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 3, new Velocity((int) (-5 * bowCharge / BOW_CHARGE_TIME) - 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 2, new Velocity((int) (-6 * bowCharge / BOW_CHARGE_TIME) - 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
             case RIGHT:
-                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 3, new Velocity((int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
+                projectiles.add(new ProjectileArrow(new Point(getCenterOfMass().x, getCenterOfMass().y + 7), getZDisplacement() + 2, new Velocity((int) (6 * bowCharge / BOW_CHARGE_TIME) + 1, 0), bowCharge / BOW_CHARGE_TIME, true, (int) (5 * bowCharge / BOW_CHARGE_TIME) + 1, getImageProvider(), getAudioPlayer()));
                 break;
         }
         bowCharge = 0;
+    }
+    
+    public void swingSword() {
+        if (!swordSwingDebug) {
+            swordAttackTimer.start();
+            switch (facing) {
+                case UP:
+                    projectiles.add(new SwordSwing(new Point(getCenterOfMass().x, getCenterOfMass().y - 6), getZDisplacement() + 1, 270, true, 3, getImageProvider(), getAudioPlayer()));
+                    break;
+                case DOWN:
+                    projectiles.add(new SwordSwing(new Point(getCenterOfMass().x, getCenterOfMass().y + 11), getZDisplacement() + 1, 90, true, 3, getImageProvider(), getAudioPlayer()));
+                    break;
+                case LEFT:
+                    projectiles.add(new SwordSwing(new Point(getCenterOfMass().x - 8, getCenterOfMass().y + 3), getZDisplacement() + 1, 180, true, 3, getImageProvider(), getAudioPlayer()));
+                    break;
+                case RIGHT:
+                    projectiles.add(new SwordSwing(new Point(getCenterOfMass().x + 8, getCenterOfMass().y + 3), getZDisplacement() + 1, 0, true, 3, getImageProvider(), getAudioPlayer()));
+                    break;
+            }
+            bowCharge = 0;
+        }
+    }
+    
+    public void setSwordSwingDebug(boolean swordSwingDebug) {
+        this.swordSwingDebug = swordSwingDebug;
     }
     
     @Override
@@ -274,20 +345,31 @@ public class Player extends Entity {
     }
     
     private void updateFacingDirection() {
-        Direction facingBackup = facing;
-        if (!directions.isEmpty()) facing = directions.get(directions.size() - 1);
+        if (directions != null && !directions.isEmpty()) facing = directions.get(directions.size() - 1);
         switch (facing) {
             case UP:
-                if (getVelocity().y >= 0) facing = facingBackup;
+                if (getVelocity().y >= 0) {
+                    if (getVelocity().x < 0) facing = Direction.LEFT;
+                    else if (getVelocity().x > 0) facing = Direction.RIGHT;
+                }
                 break;
             case DOWN:
-                if (getVelocity().y <= 0) facing = facingBackup;
+                if (getVelocity().y <= 0) {
+                    if (getVelocity().x < 0) facing = Direction.LEFT;
+                    else if (getVelocity().x > 0) facing = Direction.RIGHT;
+                }
                 break;
             case LEFT:
-                if (getVelocity().x >= 0) facing = facingBackup;
+                if (getVelocity().x >= 0) {
+                    if (getVelocity().y < 0) facing = Direction.UP;
+                    else if (getVelocity().y > 0) facing = Direction.DOWN;
+                }
                 break;
             case RIGHT:
-                if (getVelocity().x <= 0) facing = facingBackup;
+                if (getVelocity().x <= 0) {
+                    if (getVelocity().y < 0) facing = Direction.UP;
+                    else if (getVelocity().y > 0) facing = Direction.DOWN;
+                }
                 break;
         }
     }
@@ -295,13 +377,8 @@ public class Player extends Entity {
     @Override
     public void move() {
         
-        if (getPosition().x + getVelocity().x <= screenLimiter.getMinX() || getPosition().x + getVelocity().x >= screenLimiter.getMaxX()) displacementPosition.x += getVelocity().x;
-        else if (displacementPosition.x == 0) environmentPosition.x += getVelocity().x;
-        else displacementPosition.x = 0;
-        
-        if (getPosition().y + getVelocity().y <= screenLimiter.getMinY() || getPosition().y + getVelocity().y >= screenLimiter.getMaxY()) displacementPosition.y += getVelocity().y;
-        else if (displacementPosition.y == 0) environmentPosition.y += getVelocity().y;
-        else displacementPosition.y = 0;
+        environmentPosition.x += getVelocity().x;
+        environmentPosition.y += getVelocity().y;
         
         applyZVelocity();
         
@@ -384,6 +461,14 @@ public class Player extends Entity {
     
     public int getScreenMaxY() {
         return screenLimiter.getMaxY() - (getSize().height / 2);
+    }
+    
+    public void setScreenLimiter(int screenWidth, int screenHeight) {
+        
+        screenLimiter.setMinX(-screenWidth / 2);
+        screenLimiter.setMinY(-screenHeight / 2);
+        screenLimiter.setMaxX(screenWidth / 2);
+        screenLimiter.setMaxY(screenHeight / 2);
     }
     
     public void heal(int health) {

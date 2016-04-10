@@ -10,5 +10,5 @@ package plunder.java.main;
  * @author Kyle
  */
 public enum ActionState {
-    WALKING, IDLE, JUMPING, BOW
+    WALKING, IDLE, JUMPING, BOW, SWORD
 }

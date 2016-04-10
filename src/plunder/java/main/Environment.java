@@ -43,6 +43,7 @@ import static plunder.java.main.EntityManager.entities;
 import static plunder.java.main.EntityManager.explosions;
 import static plunder.java.main.EntityManager.player;
 import static plunder.java.main.EntityManager.projectiles;
+import static plunder.java.main.MapManager.environmentGrid;
 import plunder.java.resources.AudioManager;
 
 /**
@@ -50,8 +51,6 @@ import plunder.java.resources.AudioManager;
  * @author Kyle van Wiltenburg
  */
 class Environment extends environment.Environment {
-    
-    public final Grid environmentGrid;
     
     private boolean paused;
     
@@ -79,22 +78,14 @@ class Environment extends environment.Environment {
         am = new AudioManager();
         
         environmentGrid = new Grid
-        (DEFAULT_WINDOW_WIDTH / GRID_CELL_SIZE, DEFAULT_WINDOW_HEIGHT / GRID_CELL_SIZE * 2, GRID_CELL_SIZE, GRID_CELL_SIZE, new Point(-DEFAULT_WINDOW_X, -DEFAULT_WINDOW_Y), Color.BLACK);
+        (DEFAULT_WINDOW_WIDTH / GRID_CELL_SIZE, DEFAULT_WINDOW_HEIGHT / GRID_CELL_SIZE, GRID_CELL_SIZE, GRID_CELL_SIZE, new Point(-DEFAULT_WINDOW_X, -DEFAULT_WINDOW_Y), Color.BLACK);
         
-        updateGrid(2, 2);
+        MapManager.updateGrid(2, 2);
         
         player = new Player(new Point(0, 0), new PlayerScreenLimitProvider(environmentGrid.getGridSize().width - DEFAULT_WINDOW_WIDTH, environmentGrid.getGridSize().height - DEFAULT_WINDOW_HEIGHT), im, am);
     }
     
-    private void updateGrid(double xScreens, double yScreens) {
-        if (xScreens < 1) xScreens = 1;
-        if (yScreens < 1) yScreens = 1;
-        int x = (int) (xScreens * DEFAULT_WINDOW_WIDTH);
-        int y = (int) (yScreens * DEFAULT_WINDOW_HEIGHT);
-        environmentGrid.setPosition(new Point(-(x / 2), -(y / 2)));
-        environmentGrid.setColumns(x / environmentGrid.getCellWidth());
-        environmentGrid.setRows(y / environmentGrid.getCellHeight());
-    }
+    
 
     Font gamefont, gamefont_7, gamefont_14;
 
@@ -193,6 +184,9 @@ class Environment extends environment.Environment {
             
             else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
+            else if (e.getKeyCode() == KeyEvent.VK_1) MapManager.updateGrid(1, 1);
+            else if (e.getKeyCode() == KeyEvent.VK_2) MapManager.updateGrid(2, 2);
+            else if (e.getKeyCode() == KeyEvent.VK_3) MapManager.updateGrid(1, 2);
             
             else if (e.getKeyCode() == KeyEvent.VK_F && player != null) {
                 consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
@@ -203,8 +197,12 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_H && player != null) {
                 consumables.add(new Arrow(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
             }
-            else if (e.getKeyCode() == KeyEvent.VK_PERIOD && player != null) {
+            else if (e.getKeyCode() == KeyEvent.VK_SLASH && player != null) {
                 player.useBomb();
+            }
+            else if (e.getKeyCode() == KeyEvent.VK_PERIOD && player != null) {
+                player.swingSword();
+                player.setSwordSwingDebug(true);
             }
 
             else if (e.getKeyCode() == KeyEvent.VK_Z && player != null) {
@@ -233,6 +231,7 @@ class Environment extends environment.Environment {
             else if (e.getKeyCode() == KeyEvent.VK_DOWN && player.getBowDirections().contains(Direction.DOWN)) player.removeBowDirection(Direction.DOWN);
             else if (e.getKeyCode() == KeyEvent.VK_LEFT && player.getBowDirections().contains(Direction.LEFT)) player.removeBowDirection(Direction.LEFT);
             else if (e.getKeyCode() == KeyEvent.VK_RIGHT && player.getBowDirections().contains(Direction.RIGHT)) player.removeBowDirection(Direction.RIGHT);
+            else if (e.getKeyCode() == KeyEvent.VK_PERIOD) player.setSwordSwingDebug(false);
         }
     }
     
@@ -251,7 +250,7 @@ class Environment extends environment.Environment {
         
         if (player != null) {
             xTranslation = player.getPosition().x;
-            yTranslation = player.getPosition().y - player.getZDisplacement() - (player.getSize().height / 2);
+            yTranslation = player.getPosition().y - player.getZDisplacement();
             if (xTranslation < player.getScreenMinX()) xTranslation = player.getScreenMinX();
             else if (xTranslation > player.getScreenMaxX()) xTranslation = player.getScreenMaxX();
             if (yTranslation < player.getScreenMinY()) yTranslation = player.getScreenMinY();
@@ -367,8 +366,6 @@ class Environment extends environment.Environment {
         }
         graphics.drawImage(im.getImage(PImageManager.ITEM_SWORD), 225, 5, 10, 10, null);
         graphics.drawImage(im.getImage(PImageManager.ITEM_BOW), 241, 5, 10, 10, null);
-        
-//        im.drawTintedImage(graphics, im.getImage(PImageManager.PLAYER_IDLE_DOWN_00), 10, 10, 16, 16, new Color(255, 0, 0, 50));
         
         if (paused) {
             graphics.setColor(new Color(0, 0, 0, 100));

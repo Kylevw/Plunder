@@ -48,7 +48,7 @@ public class SamsaraEye extends Enemy {
     private static final int PROJECTILE_STRENGTH = 1;
     public static final int DEFENSE = 1;
     public static final int SIGHT_DISTANCE = 160;
-    public static final int ATTACK_DISTANCE = 100;
+    public static final int ATTACK_DISTANCE = 90;
     public static final int WEIGHT = 3;
     
     private static final int DEFAULT_Z_DISPLACEMENT = 2;
@@ -113,7 +113,7 @@ public class SamsaraEye extends Enemy {
     public void startAttackAI() {
         setVelocity(0, 0);
         attackMoveTimer.start();
-        Velocity projectileVelocity = TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 7);
+        Velocity projectileVelocity = TrigonometryCalculator.calculateVelocity(getPosition(), EntityManager.player.getPosition(), 8);
         projectiles.add(new ProjectileLaser(new Point(getCenterOfMass().x, getCenterOfMass().y + 1), getZDisplacement() - 1, projectileVelocity, false, PROJECTILE_STRENGTH, getImageProvider(), getAudioPlayer()));
     }
     

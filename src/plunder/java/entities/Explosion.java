@@ -38,7 +38,7 @@ public class Explosion {
     
     private static final int ANIMATION_SPEED = 80;
     private static final int RADIUS = 27;
-    private static final int MAX_DAMAGE = 4;
+    private static final int MAX_DAMAGE = 5;
     
     private boolean dealtDamage;
     
@@ -68,8 +68,8 @@ public class Explosion {
                 EntityManager.getEnemies().stream().forEach((enemy) -> {
                     double enemyDistance = TrigonometryCalculator.getSideLength(enemy.getZDisplacement(), TrigonometryCalculator.getHypotenuse(position.x, position.y, enemy.getPosition().x, enemy.getPosition().y));
                     if (enemyDistance <= size * RADIUS / 2) {
-                        enemy.damage((int) ((size * RADIUS - enemyDistance - 1) * MAX_DAMAGE / RADIUS) + 1);
                         enemy.accelerateKnockbackVelocity(TrigonometryCalculator.calculateVelocity(position, enemy.getPosition(), ((RADIUS * size) - enemyDistance) * 5 / RADIUS));
+                        enemy.damage((int) ((size * RADIUS - enemyDistance - 1) * MAX_DAMAGE / RADIUS) + 1);
                     }
                 });
             }

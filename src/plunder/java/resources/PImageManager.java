@@ -47,6 +47,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String BRICK_TILE_DARK = "BRICK_TILE_DARK";
     
     public static final String ENTITY_SHADOW = "ENTITY_SHADOW";
+    
+    public static final String SWORD_SWING_00 = "SWORD_SWING_00";
+    public static final String SWORD_SWING_01 = "SWORD_SWING_01";
+    public static final String SWORD_SWING_02 = "SWORD_SWING_02";
         
     public static final String EXPLOSION_00 = "EXPLOSION_00";
     public static final String EXPLOSION_01 = "EXPLOSION_01";
@@ -140,6 +144,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String PLAYER_BOW_RIGHT_01 = "PLAYER_BOW_RIGHT_01";
     public static final String PLAYER_BOW_RIGHT_02 = "PLAYER_BOW_RIGHT_02";
     
+    public static final String SWORD_SWING_LIST = "SWORD_SWING_LIST";
+    
     public static final String BAT_LIST = "BAT_LIST";
         
     public static final String CONSUMABLE_ARROW_LIST = "CONSUMABLE_ARROW_LIST";
@@ -170,6 +176,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     public static final String PLAYER_JUMP_RIGHT_LIST = "PLAYER_JUMP_RIGHT_LIST";
     
     private final ImageManager im;
+    
+    private final ArrayList<String> SWORD_SWING;
     
     private final ArrayList<String> BAT;
     
@@ -216,6 +224,8 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         ARROW = new ArrayList<>();
         LASER_BLUE = new ArrayList<>();
         
+        SWORD_SWING = new ArrayList();
+        
         BAT = new ArrayList();
         
         CONSUMABLE_HEART = new ArrayList<>();
@@ -236,7 +246,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         PLAYER_JUMP_LEFT = new ArrayList<>();
         PLAYER_JUMP_RIGHT = new ArrayList<>();
         
-                
+        SWORD_SWING.add(SWORD_SWING_02);
+        SWORD_SWING.add(SWORD_SWING_00);
+        SWORD_SWING.add(SWORD_SWING_01);
+        
         BAT.add(BAT_00);
         BAT.add(BAT_01);
         
@@ -323,6 +336,9 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         PLAYER_WALK_RIGHT.add(PLAYER_WALK_RIGHT_02);
         PLAYER_WALK_RIGHT.add(PLAYER_WALK_RIGHT_01);
         
+        
+        imageListMap.put(SWORD_SWING_LIST, SWORD_SWING);
+        
         imageListMap.put(BAT_LIST, BAT);
         
         imageListMap.put(ARROW_LIST, ARROW);
@@ -383,6 +399,7 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         
         BufferedImage bombSprites = (BufferedImage) ResourceTools.loadImageFromResource("plunder/resources/images/entity/bomb.png");
         
+        BufferedImage swordSwing = (BufferedImage) ResourceTools.loadImageFromResource("plunder/resources/images/utility/sword_swing.png");
         BufferedImage bat = (BufferedImage) ResourceTools.loadImageFromResource("plunder/resources/images/entity/bat.png");
         
         BufferedImage explosionSprites = (BufferedImage) ResourceTools.loadImageFromResource("plunder/resources/images/utility/explosion.png");
@@ -429,6 +446,10 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
         imageMap.put(CONSUMABLE_ARROW_02, consumables.getSubimage(6, 12, 3, 8));
         imageMap.put(CONSUMABLE_ARROW_03, consumables.getSubimage(9, 12, 3, 8));
         imageMap.put(CONSUMABLE_ARROW_04, consumables.getSubimage(12, 12, 3, 8));
+        
+        imageMap.put(SWORD_SWING_00, swordSwing.getSubimage(0, 0, 4, 12));
+        imageMap.put(SWORD_SWING_01, swordSwing.getSubimage(4, 0, 4, 12));
+        imageMap.put(SWORD_SWING_02, swordSwing.getSubimage(8, 0, 4, 12));
         
         imageMap.put(BAT_00, bat.getSubimage(0, 0, 9, 8));
         imageMap.put(BAT_01, bat.getSubimage(9, 0, 9, 8));
@@ -494,12 +515,22 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
     }
     
     @Override
-    public void drawTintedImage(Graphics2D graphics, BufferedImage image, int x, int y, int width, int height, Color tintColor) {
+    public BufferedImage getTintedImage(String imageName, Color tintColor) {
+        return PImageManager.this.getTintedImage(getImage(imageName), tintColor);
+    }
+    
+    @Override
+    public BufferedImage getTintedImage(BufferedImage image, Color tintColor) {
+        
+        int width = image.getWidth(null);
+        int height = image.getHeight(null);
+        BufferedImage tintedImage = new BufferedImage(width, height, BufferedImage.TRANSLUCENT);
+        
         for (int pixelX = 0; pixelX < image.getWidth(); pixelX++) {
             for (int pixelY = 0; pixelY < image.getHeight(); pixelY++) {
                 
                 int pixel = image.getRGB(pixelX, pixelY);
-                if( (pixel>>24) != 0x00 ) {        
+                if((pixel>>24) != 0x00) {        
                 
                 Color color = new Color(image.getRGB(pixelX, pixelY));
                 int red = color.getRed();
@@ -515,12 +546,12 @@ public class PImageManager extends ImageManager implements ImageProviderIntf{
                 
                 Color newColor = new Color(finalRed, finalGreen, finalBlue, color.getAlpha());
                 
-                image.setRGB(pixelX, pixelY, newColor.getRGB());
+                tintedImage.setRGB(pixelX, pixelY, newColor.getRGB());
                 }
             }
         }
         
-        graphics.drawImage(image, x, y, width, height, null);
+        return tintedImage;
         
     }
     

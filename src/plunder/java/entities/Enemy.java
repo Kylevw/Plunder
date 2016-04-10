@@ -28,6 +28,8 @@ public class Enemy extends Entity {
     
     private final int sightDistance, attackDistance;
     private final DurationTimer attackTimer;
+    private final DurationTimer invulTimer;
+    public static final int INVUL_TIME = 120;
     
     private final HealthMeter healthMeter;
     
@@ -44,6 +46,7 @@ public class Enemy extends Entity {
         this.attackDistance = attackDistance;
         healthMeter = new HealthMeter(getPosition(), maxHealth, health, getImageProvider());
         attackTimer = new DurationTimer(attackDelay);
+        invulTimer = new DurationTimer(INVUL_TIME);
     }
     
     @Override
@@ -68,6 +71,10 @@ public class Enemy extends Entity {
         }
         
         super.timerTaskHandler();
+        
+        if (!invulTimer.isComplete()) {
+            setImage(getImageProvider().getTintedImage(getAnimator().getCurrentImage(), new Color(255, 0, 0, 100)));
+        }
         
         healthMeter.setHealth(health);
         healthMeter.setPosition(new Point(getPosition().x - 4, getPosition().y - getSize().height - getZDisplacement() - 3));
@@ -113,10 +120,18 @@ public class Enemy extends Entity {
         healthMeter.draw(graphics);
     }
     
+    @Override
+    public void accelerateKnockbackVelocity(int x, int y) {
+        if (invulTimer.isComplete()) super.accelerateKnockbackVelocity(x, y);
+    }
+    
     public void damage(int damage) {
-        int damageFactor = damage - defense;
-        if (damageFactor < 0 && damage > 0) damageFactor = 1;
-        health -= damageFactor;
+        if (invulTimer.isComplete()) {
+            int damageFactor = damage - defense;
+            if (damageFactor <= 0 && damage > 0) damageFactor = 1;
+            health -= damageFactor;
+            invulTimer.start();
+        }
     }
     
     public int getAttackDistance() {
