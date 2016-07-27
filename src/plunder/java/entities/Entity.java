@@ -9,8 +9,6 @@ import environment.Actor;
 import environment.Physics;
 import environment.Velocity;
 import images.Animator;
-import plunder.java.resources.PImageManager;
-import plunder.java.resources.ImageProviderIntf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -18,7 +16,12 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import static plunder.java.main.EntityManager.explosions;
+import plunder.java.main.MapManager;
+import static plunder.java.main.MapManager.environmentGrid;
+import plunder.java.main.TileMap;
 import plunder.java.resources.AudioPlayerIntf;
+import plunder.java.resources.ImageProviderIntf;
+import plunder.java.resources.PImageManager;
 
 /**
  *
@@ -84,7 +87,16 @@ public class Entity extends Actor{
     public void timerTaskHandler() {
         updateImage();
         
-        setPosition(getPosition().x + (int) xKnockback, getPosition().y + (int) yKnockback);
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().x + (int) xKnockback,
+                getObjectGroundBoundary().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            setPosition(getPosition().x + (int) xKnockback, getPosition().y);
+        }
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().y,
+                getObjectGroundBoundary().y + (int) yKnockback, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            setPosition(getPosition().x, getPosition().y + (int) yKnockback);
+        }
         if (xKnockback != 0) xKnockback -= weight * xKnockback / Math.abs(xKnockback) / 8;
         if (yKnockback != 0) yKnockback -= weight * yKnockback / Math.abs(yKnockback) / 8;
         
@@ -160,7 +172,16 @@ public class Entity extends Actor{
     @Override
     public void move() {
         applyZVelocity();
-        super.move();
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            setPosition(getPosition().x + getVelocity().x, getPosition().y);
+        }
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().x,
+                getObjectGroundBoundary().y + getVelocity().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            setPosition(getPosition().x, getPosition().y + getVelocity().y);
+        }
     }
     
     public void applyZVelocity() {

@@ -184,9 +184,9 @@ class Environment extends environment.Environment {
             
             else if (e.getKeyCode() == KeyEvent.VK_SPACE) player.jump();
             
-            else if (e.getKeyCode() == KeyEvent.VK_1) MapManager.updateGrid(1, 1);
-            else if (e.getKeyCode() == KeyEvent.VK_2) MapManager.updateGrid(2, 2);
-            else if (e.getKeyCode() == KeyEvent.VK_3) MapManager.updateGrid(1, 2);
+//            else if (e.getKeyCode() == KeyEvent.VK_1) MapManager.updateGrid(1, 1);
+//            else if (e.getKeyCode() == KeyEvent.VK_2) MapManager.updateGrid(2, 2);
+//            else if (e.getKeyCode() == KeyEvent.VK_3) MapManager.updateGrid(1, 2);
             
             else if (e.getKeyCode() == KeyEvent.VK_F && player != null) {
                 consumables.add(new Heart(new Point(player.getPosition().x, player.getPosition().y - 30), 5, new Velocity(0, 0), 0, im, am));
@@ -237,6 +237,11 @@ class Environment extends environment.Environment {
     
     @Override
     public void environmentMouseClicked(MouseEvent e) {
+        Point ePoint = e.getPoint();
+        ePoint.setLocation(
+                ePoint.x * DEFAULT_WINDOW_WIDTH / Plunder.getWindowSize().width,
+                ePoint.y * DEFAULT_WINDOW_HEIGHT / Plunder.getWindowSize().height
+        );
     }
     
     @Override
@@ -254,9 +259,11 @@ class Environment extends environment.Environment {
             if (xTranslation < player.getScreenMinX()) xTranslation = player.getScreenMinX();
             else if (xTranslation > player.getScreenMaxX()) xTranslation = player.getScreenMaxX();
             if (yTranslation < player.getScreenMinY()) yTranslation = player.getScreenMinY();
-            else if (yTranslation > player.getScreenMaxY()) yTranslation = player.getScreenMaxY();
+            else if (yTranslation > player.getScreenMaxY() + 8) yTranslation = player.getScreenMaxY() + 8;
             xTranslation = DEFAULT_WINDOW_X - xTranslation;
             yTranslation = DEFAULT_WINDOW_Y - yTranslation;
+            if (MapManager.environmentGrid.getColumns()<= DEFAULT_WINDOW_WIDTH / GRID_CELL_SIZE) xTranslation = DEFAULT_WINDOW_WIDTH / 2;
+            if (MapManager.environmentGrid.getRows() <= DEFAULT_WINDOW_HEIGHT / GRID_CELL_SIZE) yTranslation = DEFAULT_WINDOW_HEIGHT / 2;
         }
         
         // Translates all background images in reference to the player's current position
@@ -267,65 +274,9 @@ class Environment extends environment.Environment {
             
 //            drawGridBase(graphics);
             
-            fillGrid(graphics, im.getImage(PImageManager.SAND_TILE));
 //            buildWall(graphics, im.getImage(PImageManager.BRICK_TILE), -4, -2, 4, 2);
             
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_IN_UPLEFT), -2, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_IN_UPRIGHT), 0, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_IN_DOWNLEFT), -2, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_IN_DOWNRIGHT), 0, 0);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), -1, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), -1, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), -2, -1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), 0, -1);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_OUT_UPLEFT), 2, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_OUT_UPRIGHT), -4, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_OUT_DOWNLEFT), 2, -4);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_CORNER_OUT_DOWNRIGHT), -4, -4);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), -3, -4);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), -2, -4);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), -1, -4);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), 0, -4);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DOWN), 1, -4);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), -3, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), -2, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), -1, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), 0, 2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_UP), 1, 2);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), 2, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), 2, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), 2, -1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), 2, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_LEFT), 2, 1);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), -4, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), -4, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), -4, -1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), -4, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_RIGHT), -4, 1);
-            
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -3, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -2, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -1, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 0, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, -3);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -3, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, -2);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -3, -1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, -1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -3, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, 0);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -3, 1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -2, 1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), -1, 1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 0, 1);
-            placeTile(graphics, im.getImage(PImageManager.BRICK_TILE_DARK), 1, 1);
-            
+            TileMap.drawMap(graphics, xTranslation, yTranslation, im);
 //            environmentGrid.paintComponent(graphics);
             
         }
@@ -397,26 +348,6 @@ class Environment extends environment.Environment {
         environmentGrid.paintComponent(graphics);
     }
     
-    public void buildWall(Graphics2D graphics, BufferedImage image, int cellX, int cellY, int columns, int rows, int xTranslation, int yTranslation) {
-        for (int x = 0; x < columns; x++) {
-            for (int y = 0; y < rows; y++) {
-                
-                Point gridPoint = new Point(environmentGrid.getCellSystemCoordinate((environmentGrid.getColumns() / 2) + cellX + x, (environmentGrid.getRows() / 2) + cellY + y));
-                    if (player != null &&
-                        gridPoint.x + environmentGrid.getCellWidth() >= -xTranslation &&
-                        gridPoint.x - DEFAULT_WINDOW_WIDTH <= -xTranslation &&
-                        gridPoint.y + environmentGrid.getCellHeight() >= -yTranslation &&
-                        gridPoint.y - DEFAULT_WINDOW_HEIGHT <= -yTranslation)
-                      
-                        graphics.drawImage(image,
-                        gridPoint.x, gridPoint.y,
-                        environmentGrid.getCellWidth(),
-                        environmentGrid.getCellHeight(), null);
-                
-            }
-        }
-    }
-    
     public void placeTile(Graphics2D graphics, BufferedImage image, int cellX, int cellY) {
         Point gridPoint = new Point(environmentGrid.getCellSystemCoordinate((environmentGrid.getColumns() / 2) + cellX, (environmentGrid.getRows() / 2) + cellY));
             if (gridPoint.x + environmentGrid.getCellWidth() >= -xTranslation &&
@@ -429,25 +360,6 @@ class Environment extends environment.Environment {
                 environmentGrid.getCellWidth(),
                 environmentGrid.getCellHeight(), null);
                     
-    }
-    
-    public void fillGrid(Graphics2D graphics, BufferedImage image) {
-        for (int x = 0; x < environmentGrid.getColumns(); x++) {
-                for (int y = 0; y < environmentGrid.getRows(); y++) {
-                    
-                    Point gridPoint = new Point(environmentGrid.getCellSystemCoordinate(x, y));
-                    if (gridPoint.x + environmentGrid.getCellWidth() >= -xTranslation &&
-                        gridPoint.x - DEFAULT_WINDOW_WIDTH <= -xTranslation &&
-                        gridPoint.y + environmentGrid.getCellHeight() >= -yTranslation &&
-                        gridPoint.y - DEFAULT_WINDOW_HEIGHT <= -yTranslation)
-                      
-                        graphics.drawImage(image,
-                        gridPoint.x, gridPoint.y,
-                        environmentGrid.getCellWidth(),
-                        environmentGrid.getCellHeight(), null);
-                    
-                }
-            }
     }
     
 }

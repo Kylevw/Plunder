@@ -5,8 +5,6 @@
  */
 package plunder.java.main;
 
-import plunder.java.main.ScreenLimitProviderIntf;
-
 /**
  *
  * @author Kyle van Wiltenburg

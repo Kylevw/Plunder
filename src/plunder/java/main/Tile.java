@@ -26,7 +26,7 @@ public class Tile {
         
     }
     
-    public Point getGridPosition() {
+    public Point getPosition() {
         return position;
     }
     

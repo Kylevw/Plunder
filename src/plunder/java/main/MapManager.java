@@ -19,7 +19,7 @@ import static plunder.java.main.Environment.DEFAULT_WINDOW_WIDTH;
  */
 public class MapManager {
     
-    ArrayList<String>[][] list = new ArrayList[10][10];
+    
     
     public static Grid environmentGrid;
     
@@ -35,6 +35,27 @@ public class MapManager {
         if (player != null) player.setScreenLimiter(
                 environmentGrid.getGridSize().width - DEFAULT_WINDOW_WIDTH,
                 environmentGrid.getGridSize().height - DEFAULT_WINDOW_HEIGHT);
+        
+        int[][] mapData = new int[environmentGrid.getColumns()][environmentGrid.getRows()];
+        for (int i = 0; i < mapData.length; i++) {
+            mapData[i][0] = 1;
+            mapData[i][mapData[0].length - 1] = 1;
+            mapData[i][1] = 2;
+            mapData[i][mapData[0].length - 2] = 3;
+        }
+        for (int i = 0; i < mapData[0].length; i++) {
+            mapData[0][i] = 1;
+            mapData[mapData.length - 1][i] = 1;
+            if (i > 0 && i < (mapData[0].length - 1)) {
+                mapData[1][i] = 4;
+                mapData[mapData.length - 2][i] = 5;
+            }
+        }
+        mapData[1][1] = 6;
+        mapData[1][mapData[0].length - 2] = 7;
+        mapData[mapData.length - 2][1] = 8;
+        mapData[mapData.length - 2][mapData[0].length - 2] = 9;
+        TileMap.setMap(mapData);
     }
     
     public void addTile(TileID tileID, int x, int y) {

@@ -19,6 +19,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import static plunder.java.main.EntityManager.bombs;
 import static plunder.java.main.EntityManager.projectiles;
+import plunder.java.main.MapManager;
+import static plunder.java.main.MapManager.environmentGrid;
+import plunder.java.main.TileMap;
 import plunder.java.resources.AudioPlayerIntf;
 import timer.DurationTimer;
 
@@ -260,10 +263,23 @@ public class Player extends Entity {
             case WALKING:
                 switch (facing) {
                     case UP: 
-                        setImageList(PImageManager.PLAYER_WALK_UP_LIST);
+                        if (TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+                            if (getVelocity().x < 0) setImageList(PImageManager.PLAYER_WALK_LEFT_LIST);
+                            else if (getVelocity().x > 0) setImageList(PImageManager.PLAYER_WALK_RIGHT_LIST);
+                            else setImageList(PImageManager.PLAYER_WALK_UP_LIST);
+                        } else setImageList(PImageManager.PLAYER_WALK_UP_LIST);
+                        
                         break;
                     case DOWN: 
-                        setImageList(PImageManager.PLAYER_WALK_DOWN_LIST);
+                        if (TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+                            if (getVelocity().x < 0) setImageList(PImageManager.PLAYER_WALK_LEFT_LIST);
+                            else if (getVelocity().x > 0) setImageList(PImageManager.PLAYER_WALK_RIGHT_LIST);
+                            else setImageList(PImageManager.PLAYER_WALK_DOWN_LIST);
+                        } else setImageList(PImageManager.PLAYER_WALK_DOWN_LIST);
                         break;
                     case LEFT: 
                         setImageList(PImageManager.PLAYER_WALK_LEFT_LIST);
@@ -377,10 +393,22 @@ public class Player extends Entity {
     @Override
     public void move() {
         
-        environmentPosition.x += getVelocity().x;
-        environmentPosition.y += getVelocity().y;
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            environmentPosition.x += getVelocity().x;
+        }
+        if (!TileMap.collision(new Rectangle(getObjectGroundBoundary().x,
+                getObjectGroundBoundary().y + getVelocity().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            environmentPosition.y += getVelocity().y;
+        }
         
         applyZVelocity();
+        
+        
+        
+        
         
     }
     

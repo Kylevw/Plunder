@@ -9,7 +9,9 @@ import static environment.Utility.random;
 import environment.Velocity;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import static plunder.java.main.EntityManager.consumables;
+import plunder.java.main.TileMap;
 import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 import plunder.java.resources.PImageManager;
@@ -39,6 +41,12 @@ public class ProjectileArrow extends Projectile{
     public void timerTaskHandler() {
         move();
         applyZVelocity();
+        if (TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y + getVelocity().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) {
+            int respawn = random(2);
+            if (respawn > 0) consumables.add(new Arrow(getPosition(), 0, new Velocity(getVelocity().x / 2, getVelocity().y / 2), 2, getImageProvider(), getAudioPlayer()));
+        }
         super.timerTaskHandler();
         if (isFriendly() && getZDisplacement() <= 0) {
             int respawn = random(2);

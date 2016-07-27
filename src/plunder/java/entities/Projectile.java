@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import path.TrigonometryCalculator;
 import plunder.java.main.EntityManager;
 import static plunder.java.main.EntityManager.player;
+import plunder.java.main.TileMap;
 import plunder.java.resources.AudioPlayerIntf;
 import plunder.java.resources.ImageProviderIntf;
 
@@ -66,6 +67,10 @@ public class Projectile extends Entity{
     public void timerTaskHandler() {
         
         setRotation(TrigonometryCalculator.getVelocityAngle(getVelocity()));
+        
+        if (TileMap.collision(new Rectangle(getObjectGroundBoundary().x + getVelocity().x,
+                getObjectGroundBoundary().y + getVelocity().y, getObjectGroundBoundary().width,
+                getObjectGroundBoundary().height))) setDespawn(true);
         
         if (getZDisplacement() <= 0) setDespawn(true);
         else if (friendly) {
